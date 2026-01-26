@@ -1,0 +1,41 @@
+title: "[Presentazione] Nome o nickname"
+labels: ["presentazione"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Usa questo template per presentarti alla community DataCivicLab.
+
+  - type: textarea
+    id: bio
+    attributes:
+      label: 👤 Chi sei
+      description: Breve bio (2–3 righe).
+    validations:
+      required: true
+
+  - type: textarea
+    id: competenze
+    attributes:
+      label: 🧠 Competenze
+      description: Dati, analisi, visualizzazione, metodo, altro.
+
+  - type: textarea
+    id: interessi
+    attributes:
+      label: 💡 Cosa ti interessa
+      description: Temi civici, dataset, progetti.
+
+  - type: dropdown
+    id: disponibilita
+    attributes:
+      label: ⏱️ Disponibilità
+      options:
+        - Occasionale
+        - Continuativa
+
+  - type: textarea
+    id: contributo
+    attributes:
+      label: 🤝 Come vorresti contribuire
+      description: Discussioni, analisi, doc, QA, altro.

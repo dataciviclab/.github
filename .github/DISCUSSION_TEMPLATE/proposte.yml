@@ -1,0 +1,69 @@
+title: "[Progetto] Titolo del progetto"
+labels: ["proposta"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Usa questo template per proporre un **nuovo progetto** del DataCivicLab.
+
+  - type: textarea
+    id: domanda
+    attributes:
+      label: 🎯 Domanda civica
+      description: Una sola frase chiara.
+    validations:
+      required: true
+
+  - type: textarea
+    id: obiettivo
+    attributes:
+      label: 📌 Obiettivo del progetto
+      description: Cosa produrremo e per chi?
+    validations:
+      required: true
+
+  - type: textarea
+    id: dataset
+    attributes:
+      label: 📊 Dataset coinvolti
+      description: Dataset — Fonte — Periodo — Livello.
+
+  - type: dropdown
+    id: output
+    attributes:
+      label: 🛠️ Output previsto
+      options:
+        - Dashboard
+        - Report
+        - Pagina pubblica
+        - Altro
+
+  - type: checkboxes
+    id: ruoli
+    attributes:
+      label: 👥 Ruoli utili
+      options:
+        - label: Data
+        - label: Metodo
+        - label: Viz
+        - label: QA
+        - label: Doc
+
+  - type: dropdown
+    id: complessita
+    attributes:
+      label: ⏱️ Complessità stimata
+      options:
+        - Bassa
+        - Media
+        - Alta
+
+  - type: dropdown
+    id: stato
+    attributes:
+      label: 🚦 Stato
+      options:
+        - Idea
+        - In discussione
+        - Pronto per Issue
+        - In corso

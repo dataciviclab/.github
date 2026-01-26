@@ -1,0 +1,49 @@
+title: "[Metodo] Tema / scelta metodologica"
+labels: ["metodo"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Usa questo template per discutere **scelte metodologiche** del Lab.
+
+  - type: textarea
+    id: contesto
+    attributes:
+      label: 🧩 Contesto
+      description: In quale fase del lavoro si applica questo metodo?
+    validations:
+      required: true
+
+  - type: textarea
+    id: obiettivo
+    attributes:
+      label: 🎯 Obiettivo
+      description: Cosa vogliamo ottenere con questa scelta?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposta
+    attributes:
+      label: 🛠️ Proposta metodologica
+      description: Assunzioni, scelte fatte, alternative.
+    validations:
+      required: true
+
+  - type: textarea
+    id: procontro
+    attributes:
+      label: ⚖️ Pro e contro
+      description: Vantaggi, limiti, rischi.
+
+  - type: textarea
+    id: impatto
+    attributes:
+      label: 📐 Impatto sui risultati
+      description: Come cambia l’interpretazione dei dati?
+
+  - type: textarea
+    id: domande
+    attributes:
+      label: ❓ Questioni aperte
+      description: Cosa va validato o discusso?
