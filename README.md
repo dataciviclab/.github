@@ -21,3 +21,8 @@ Qui ci sono:
 > Se una regola vale per più di un progetto, vive qui.
 
 Per regole specifiche di un progetto, fai riferimento al repository dedicato.
+
+## 📘 Regole operative
+
+- [Workflow di lavoro](WORKFLOW.md)
+- [Come contribuire](CONTRIBUTING.md)
