@@ -6,7 +6,7 @@ Qui trovi come iniziare **senza perdere tempo**.
 ---
 
 ## Come iniziare
-1. Leggi `WORKFLOW.md`
+1. Leggi [WORKFLOW.md](WORKFLOW.md)
 2. Guarda le Issue aperte
 3. Scegline una assegnabile
 4. Assegnati l’Issue
