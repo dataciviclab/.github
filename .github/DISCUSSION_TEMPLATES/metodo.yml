@@ -1,0 +1,65 @@
+title: "[Metodo] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Discussione su scelte metodologiche: assunzioni, limiti, coerenza, impatto.
+
+  - type: textarea
+    id: contesto
+    attributes:
+      label: "🧩 Contesto"
+      description: "In quale fase si applica? (raw→clean→mart / KPI / viz / QA / doc)"
+      placeholder: "Es. definizione KPI per dashboard rifiuti comunali..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: obiettivo
+    attributes:
+      label: "🎯 Obiettivo"
+      placeholder: "Es. rendere confrontabili i dati tra anni e territori..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposta
+    attributes:
+      label: "🛠️ Proposta metodologica"
+      description: "Spiega la scelta in modo replicabile."
+      placeholder: "- Assunzioni\n- Regole\n- Normalizzazioni\n- Join\n- Filtri"
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternative
+    attributes:
+      label: "🔁 Alternative considerate"
+      placeholder: "Opzioni alternative e perché non le usiamo (se serve)."
+    validations:
+      required: false
+
+  - type: textarea
+    id: procontro
+    attributes:
+      label: "⚖️ Pro e contro"
+      placeholder: "- Pro:\n- Contro:\n- Rischi interpretativi:"
+    validations:
+      required: false
+
+  - type: textarea
+    id: impatto
+    attributes:
+      label: "📐 Impatto sui risultati"
+      placeholder: "Come cambia la lettura dei numeri? Cosa potrebbe essere frainteso?"
+    validations:
+      required: false
+
+  - type: textarea
+    id: to_validate
+    attributes:
+      label: "✅ Cosa va validato"
+      description: "Che verifica proponi? (QA, cross-check, campionamento, fonte alternativa)"
+      placeholder: "- Validare su 2 comuni campione\n- Confronto con fonte X\n- Check outlier"
+    validations:
+      required: false
