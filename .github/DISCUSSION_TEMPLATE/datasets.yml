@@ -1,93 +1,66 @@
-title: "[Dataset] "
+title: "[Dataset] Nome dataset – Fonte"
+labels: ["dataset"]
 body:
   - type: markdown
     attributes:
       value: |
-        Inserisci un dataset utile per analisi civiche. Minimal, chiaro, verificabile.
+        Usa questo template per proporre o documentare un **dataset** utile ai progetti del DataCivicLab.
 
-  - type: input
-    id: nome_dataset
+  - type: textarea
+    id: descrizione
     attributes:
-      label: "📊 Nome dataset"
-      placeholder: "Es. Consumi energia elettrica per settore (Terna)"
+      label: 📌 Descrizione breve
+      description: Cos’è questo dataset e perché è rilevante (max 2–3 righe).
     validations:
       required: true
 
   - type: input
     id: fonte
     attributes:
-      label: "🏛️ Fonte ufficiale (ente)"
-      placeholder: "Es. Terna / ISTAT / MEF / ISPRA"
+      label: 🏛️ Fonte ufficiale
+      placeholder: Ente / Ministero / Portale open data
     validations:
       required: true
 
   - type: input
     id: link
     attributes:
-      label: "🔗 Link fonte"
-      placeholder: "URL pagina download / catalogo / API"
+      label: 🔗 Link al dataset
+      placeholder: https://...
     validations:
       required: true
-
-  - type: input
-    id: licenza
-    attributes:
-      label: "📜 Licenza (se nota)"
-      placeholder: "Es. CC-BY / IODL 2.0 / n.d."
-    validations:
-      required: false
 
   - type: input
     id: periodo
     attributes:
-      label: "📅 Copertura temporale"
-      placeholder: "Es. 2014–2024 (annuale) / 2020–oggi (mensile)"
-    validations:
-      required: true
+      label: 📅 Copertura temporale
+      placeholder: Es. 2015–2024
 
   - type: dropdown
     id: livello
     attributes:
-      label: "🗺️ Livello territoriale"
+      label: 🗺️ Livello territoriale
       options:
-        - "Nazionale"
-        - "Regionale"
-        - "Provinciale"
-        - "Comunale"
-        - "Altro"
-    validations:
-      required: true
-
-  - type: input
-    id: formato
-    attributes:
-      label: "📂 Formato dati"
-      placeholder: "CSV / XLSX / API / JSON / altro"
-    validations:
-      required: true
+        - Nazionale
+        - Regionale
+        - Provinciale
+        - Comunale
+        - Altro
 
   - type: textarea
-    id: campi
+    id: struttura
     attributes:
-      label: "🧱 Campi principali"
-      description: "Elenca 5–15 colonne chiave (o incolla header)."
-      placeholder: "anno, regione, provincia, settore, consumo_gwh, ..."
-    validations:
-      required: false
+      label: 📂 Struttura dei dati
+      description: Formato, campi principali, dimensione stimata.
 
   - type: textarea
-    id: limiti
+    id: note
     attributes:
-      label: "⚠️ Note / limiti noti"
-      placeholder: "Es. cambi schema, dati mancanti, definizioni ambigue..."
-    validations:
-      required: false
+      label: ⚠️ Limiti / note
+      description: Dati mancanti, caveat, problemi noti.
 
   - type: textarea
     id: idee
     attributes:
-      label: "💡 Idee di utilizzo"
-      description: "Quali domande civiche o KPI potrebbero nascere?"
-      placeholder: "- Confronto regioni\n- Trend storico\n- KPI pro capite..."
-    validations:
-      required: false
+      label: 💡 Idee di utilizzo
+      description: Domande civiche, KPI, join possibili.
