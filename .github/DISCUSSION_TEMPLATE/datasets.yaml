@@ -1,0 +1,93 @@
+title: "[Dataset] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Inserisci un dataset utile per analisi civiche. Minimal, chiaro, verificabile.
+
+  - type: input
+    id: nome_dataset
+    attributes:
+      label: "📊 Nome dataset"
+      placeholder: "Es. Consumi energia elettrica per settore (Terna)"
+    validations:
+      required: true
+
+  - type: input
+    id: fonte
+    attributes:
+      label: "🏛️ Fonte ufficiale (ente)"
+      placeholder: "Es. Terna / ISTAT / MEF / ISPRA"
+    validations:
+      required: true
+
+  - type: input
+    id: link
+    attributes:
+      label: "🔗 Link fonte"
+      placeholder: "URL pagina download / catalogo / API"
+    validations:
+      required: true
+
+  - type: input
+    id: licenza
+    attributes:
+      label: "📜 Licenza (se nota)"
+      placeholder: "Es. CC-BY / IODL 2.0 / n.d."
+    validations:
+      required: false
+
+  - type: input
+    id: periodo
+    attributes:
+      label: "📅 Copertura temporale"
+      placeholder: "Es. 2014–2024 (annuale) / 2020–oggi (mensile)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: livello
+    attributes:
+      label: "🗺️ Livello territoriale"
+      options:
+        - "Nazionale"
+        - "Regionale"
+        - "Provinciale"
+        - "Comunale"
+        - "Altro"
+    validations:
+      required: true
+
+  - type: input
+    id: formato
+    attributes:
+      label: "📂 Formato dati"
+      placeholder: "CSV / XLSX / API / JSON / altro"
+    validations:
+      required: true
+
+  - type: textarea
+    id: campi
+    attributes:
+      label: "🧱 Campi principali"
+      description: "Elenca 5–15 colonne chiave (o incolla header)."
+      placeholder: "anno, regione, provincia, settore, consumo_gwh, ..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: limiti
+    attributes:
+      label: "⚠️ Note / limiti noti"
+      placeholder: "Es. cambi schema, dati mancanti, definizioni ambigue..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: idee
+    attributes:
+      label: "💡 Idee di utilizzo"
+      description: "Quali domande civiche o KPI potrebbero nascere?"
+      placeholder: "- Confronto regioni\n- Trend storico\n- KPI pro capite..."
+    validations:
+      required: false
