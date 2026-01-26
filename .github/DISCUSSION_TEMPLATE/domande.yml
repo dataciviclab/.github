@@ -1,0 +1,44 @@
+title: "[Domanda] Scrivi la domanda civica"
+labels: ["domanda"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Usa questo template per proporre **una domanda civica chiara e misurabile**.
+
+  - type: textarea
+    id: domanda
+    attributes:
+      label: ❓ La domanda
+      description: Una sola domanda, chiara e verificabile.
+    validations:
+      required: true
+
+  - type: textarea
+    id: rilevanza
+    attributes:
+      label: 🧠 Perché è rilevante
+      description: Impatto civico e decisioni pubbliche coinvolte.
+    validations:
+      required: true
+
+  - type: textarea
+    id: dati
+    attributes:
+      label: 📊 Dati potenzialmente utili
+      description: Dataset noti o fonti da cercare.
+
+  - type: textarea
+    id: indicatori
+    attributes:
+      label: 📐 Indicatori possibili
+      description: KPI, confronti temporali o territoriali.
+
+  - type: dropdown
+    id: stato
+    attributes:
+      label: 🔄 Stato
+      options:
+        - Idea grezza
+        - In esplorazione
+        - Pronta per progetto
