@@ -36,6 +36,6 @@ Cerchiamo:
 
 👉 [Esplora le Discussions](https://github.com/orgs/dataciviclab/discussions)  
 👉 [Leggi il Manifesto](https://github.com/dataciviclab/dataciviclab/blob/main/docs/manifesto.md)  
-👉 [Unisciti alla community](https://github.com/orgs/dataciviclab/discussions)
+👉 [Unisciti alla community](https://discord.gg/rAHpuTrYK3)
 
 Costruiamo infrastruttura civica, non solo dashboard.
