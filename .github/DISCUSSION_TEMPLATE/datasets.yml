@@ -1,66 +1,28 @@
-title: "[Dataset] Nome dataset – Fonte"
-labels: ["dataset"]
+title: "[Dataset] Nome dataset"
 body:
   - type: markdown
     attributes:
       value: |
-        Usa questo template per proporre o documentare un **dataset** utile ai progetti del DataCivicLab.
-
-  - type: textarea
-    id: descrizione
-    attributes:
-      label: 📌 Descrizione breve
-      description: Cos’è questo dataset e perché è rilevante (max 2–3 righe).
-    validations:
-      required: true
+        Usa questo template per discutere una nuova fonte dati prima di aprire una Issue operativa.
 
   - type: input
     id: fonte
     attributes:
-      label: 🏛️ Fonte ufficiale
-      placeholder: Ente / Ministero / Portale open data
-    validations:
-      required: true
+      label: 🔗 Fonte ufficiale
+      placeholder: URL dataset
 
-  - type: input
-    id: link
+  - type: textarea
+    id: descrizione
     attributes:
-      label: 🔗 Link al dataset
-      placeholder: https://...
-    validations:
-      required: true
-
-  - type: input
-    id: periodo
-    attributes:
-      label: 📅 Copertura temporale
-      placeholder: Es. 2015–2024
-
-  - type: dropdown
-    id: livello
-    attributes:
-      label: 🗺️ Livello territoriale
-      options:
-        - Nazionale
-        - Regionale
-        - Provinciale
-        - Comunale
-        - Altro
+      label: 🧾 Cosa contiene?
+      description: Descrizione sintetica del dataset
 
   - type: textarea
     id: struttura
     attributes:
-      label: 📂 Struttura dei dati
-      description: Formato, campi principali, dimensione stimata.
+      label: 🏗 Struttura dati
 
   - type: textarea
-    id: note
+    id: criticita
     attributes:
-      label: ⚠️ Limiti / note
-      description: Dati mancanti, caveat, problemi noti.
-
-  - type: textarea
-    id: idee
-    attributes:
-      label: 💡 Idee di utilizzo
-      description: Domande civiche, KPI, join possibili.
+      label: ⚠ Limiti o rischi
