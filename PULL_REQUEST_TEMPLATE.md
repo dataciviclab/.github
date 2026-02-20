@@ -20,6 +20,7 @@ Indicare se questa PR impatta:
 - [ ] Dashboard
 - [ ] Metodo
 - [ ] Documentazione
+- [ ] Bugfix
 - [ ] Nessun impatto dati
 
 Spiega eventuali effetti su replicabilità o confrontabilità.
