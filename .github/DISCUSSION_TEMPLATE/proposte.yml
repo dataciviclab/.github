@@ -1,5 +1,4 @@
 title: "[Progetto] Titolo del progetto"
-labels: ["proposta"]
 body:
   - type: markdown
     attributes:
@@ -37,17 +36,6 @@ body:
         - Report
         - Pagina pubblica
         - Altro
-
-  - type: checkboxes
-    id: ruoli
-    attributes:
-      label: 👥 Ruoli utili
-      options:
-        - label: Data
-        - label: Metodo
-        - label: Viz
-        - label: QA
-        - label: Doc
 
   - type: dropdown
     id: complessita
