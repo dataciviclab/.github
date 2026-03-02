@@ -1,0 +1,28 @@
+title: "[Dataset] Nome dataset"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Usa questo template per discutere una nuova fonte dati prima di aprire una Issue operativa.
+
+  - type: input
+    id: fonte
+    attributes:
+      label: 🔗 Fonte ufficiale
+      placeholder: URL dataset
+
+  - type: textarea
+    id: descrizione
+    attributes:
+      label: 🧾 Cosa contiene?
+      description: Descrizione sintetica del dataset
+
+  - type: textarea
+    id: struttura
+    attributes:
+      label: 🏗 Struttura dati
+
+  - type: textarea
+    id: criticita
+    attributes:
+      label: ⚠ Limiti o rischi
