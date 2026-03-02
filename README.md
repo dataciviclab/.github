@@ -1,28 +1,21 @@
-# DataCivicLab – Governance & Workflow
+# DataCivicLab GitHub Commons
 
-Questo repository definisce le **regole operative comuni** a tutti i progetti del DataCivicLab.
+Questa repository raccoglie i file condivisi che definiscono l'esperienza GitHub comune di `dataciviclab`.
 
-Qui non ci sono dati, codice o dashboard.
-Qui ci sono:
-- come lavoriamo
-- come contribuiamo
-- come prendiamo decisioni
-- come manteniamo qualità e coerenza
+Qui vivono:
 
-## 📌 File principali
-- `WORKFLOW.md` → come funziona il lavoro quotidiano
-- `CONTRIBUTING.md` → come iniziare a contribuire
-- `ISSUE_TEMPLATE/` → come aprire Issue utili
-- `PULL_REQUEST_TEMPLATE.md` → come proporre cambiamenti
-- `CODE_OF_CONDUCT.md` → regole di comportamento
-- `SECURITY.md` → gestione segnalazioni sensibili
+- community health files
+- policy comuni di collaborazione
+- template per issue, pull request e discussions
+- profilo pubblico dell'organizzazione
+- istruzioni minime su supporto, sicurezza e canali
 
-## 🧭 Regola base
-> Se una regola vale per più di un progetto, vive qui.
+Qui non vivono:
 
-Per regole specifiche di un progetto, fai riferimento al repository dedicato.
+- cataloghi dataset
+- roadmap del Lab
+- metodo dati
+- documentazione tecnica del toolkit
+- bootstrap operativo dei repository dataset
 
-## 📘 Regole operative
-
-- [Workflow di lavoro](WORKFLOW.md)
-- [Come contribuire](CONTRIBUTING.md)
+Per il contesto generale del Lab e l'indice dell'ecosistema, il punto di ingresso resta la repository `dataciviclab`.

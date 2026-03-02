@@ -1,22 +1,37 @@
-# ⚖️ Governance DataCivicLab
+# Governance
 
-Questo è un progetto civico e uno spazio comune.
-Non c’è un capo e nulla è definitivo.
+Questo documento riguarda solo la collaborazione cross-repo su GitHub.
 
-Il metodo e il sistema si costruiscono attraverso:
-- contributi concreti
-- output pubblici
-- miglioramenti incrementali
+## Cosa decide questa repo
 
-Chi contribuisce se ne prende cura.
-Le decisioni seguono il metodo, non le opinioni.
+`.github` definisce gli standard condivisi dell'organizzazione per:
 
-Nel DataCivicLab usiamo GitHub Teams solo per gestire permessi tecnici.
+- onboarding contributor
+- template e flussi GitHub comuni
+- regole minime di collaborazione pubblica
+- supporto, moderazione e sicurezza
 
-- I maintainer sono custodi del metodo e dell’ordine minimo, non capi.
+Non definisce:
 
-- I contributor producono lavoro e output.
+- roadmap del Lab
+- priorita' di prodotto o di ricerca
+- metodo dati
+- scelte tecniche del `toolkit`
 
-- Gli observer osservano e imparano.
+## Ruoli pratici
 
-I ruoli non sono fissi e possono cambiare nel tempo, in base ai contributi reali.
+- `Maintainer`: cura ordine, moderazione, review e coerenza minima tra repository
+- `Contributor`: propone, discute e implementa cambiamenti
+- `Observer`: legge, segnala, commenta e porta contesto
+
+I ruoli non sono identita' fisse. Contano responsabilita' e contributi concreti.
+
+## Come prendiamo decisioni su GitHub
+
+Quando possibile:
+
+1. il confronto parte in una Discussion o in una issue
+2. il cambiamento viene proposto in modo tracciabile
+3. la decisione finale viene resa visibile nella pull request o nell'issue collegata
+
+Se una decisione riguarda un solo repository, vale la documentazione di quel repository.

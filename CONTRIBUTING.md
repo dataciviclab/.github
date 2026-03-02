@@ -1,120 +1,48 @@
-# 🤝 Come contribuire al DataCivicLab
+# Contributing
 
-Questo è un progetto civico aperto.
-Puoi contribuire anche senza far parte dell’organizzazione.
+Grazie per voler contribuire a DataCivicLab.
 
-## 🧭 1) Guardare e capire (senza fare nulla)
+Questa guida spiega come entrare in modo semplice nei repository dell'organizzazione senza duplicare la documentazione specifica dei singoli progetti.
 
-Puoi:
+## Da dove partire
 
-* leggere i repository pubblici
-* guardare gli output (dashboard, report)
-* capire **come lavoriamo davvero**
+Se vuoi capire il contesto generale, parti dalla repository `dataciviclab`.
 
-👉 Non serve iscriversi.
-👉 Non serve essere “esperti”.
+Se vuoi contribuire a un repository specifico:
 
-Questo è già contributo: **trasparenza**.
+- leggi il suo `README.md`
+- controlla issue e discussions aperte
+- verifica se esistono istruzioni locali aggiuntive
 
+## Flusso minimo
 
-## 💡 2) Proporre un problema o una domanda civica
+Nell'organizzazione usiamo un flusso semplice:
 
-Puoi:
+1. apri o trovi una Discussion se serve chiarire il contesto
+2. apri o prendi in carico una Issue quando il lavoro e' definito
+3. proponi il cambiamento con una Pull Request
 
-* aprire una **Discussion** 
-* proporre una **domanda concreta**
-* segnalare un **dataset pubblico**
+Le issue servono a rendere il lavoro visibile.
+Le pull request servono a far entrare i cambiamenti in modo chiaro e revisionabile.
 
-Esempio:
+## Cosa usare e quando
 
-> “Esiste un modo per capire come vengono spesi questi fondi?”
+- `Discussions`: domande, idee, confronto iniziale, orientamento
+- `Issues`: lavoro concreto da fare o problema da risolvere
+- `Pull requests`: proposta di modifica pronta da rivedere
 
-Non serve la soluzione.
-Serve una **buona domanda**.
+GitHub Projects puo' essere usato dai maintainer per organizzare il lavoro, ma non sostituisce issue e pull request come traccia pubblica.
 
+## Prima di aprire una PR
 
-## 📊 3) Segnalare o mappare dataset pubblici
+- controlla se esiste gia' una issue o discussion collegata
+- tieni il cambiamento piccolo e leggibile
+- spiega il perche', non solo il cosa
+- se la modifica e' specifica di un repo, segui le regole di quel repo
 
-Se conosci:
+## Confini di questa repo
 
-* una banca dati pubblica
-* un open data poco usato
-* una fonte istituzionale utile
+La repository `.github` definisce il layer comune GitHub dell'organizzazione.
+Non descrive il metodo dati, la pipeline tecnica o la struttura operativa dei repository dataset.
 
-Puoi:
-
-* segnalarla in Discussion
-* indicare link, periodo, ente
-
-👉 Questo spesso è il **vero punto di partenza**.
-
-
-## 🛠️ 4) Migliorare qualcosa che già esiste
-
-Se vedi:
-
-* un errore
-* un limite
-* una spiegazione poco chiara
-
-Puoi:
-
-* aprire una **Issue**
-* oppure una **Pull Request** (anche piccola)
-
-Non serve rifare tutto.
-Anche migliorare una frase, un grafico o una query è contributo.
-
-
-## 🔍 5) Fare revisione e QA
-
-Anche senza scrivere codice puoi:
-
-* verificare se i numeri tornano
-* controllare se il metodo è chiaro
-* segnalare ambiguità
-
-👉 Il **controllo civico** è anche questo.
-
-
-## 📣 6) Usare e diffondere gli output
-
-Puoi:
-
-* usare una dashboard
-* citarla in un articolo
-* condividerla con altri
-* usarla per fare domande a un’amministrazione
-
-Questo è **impatto reale**, non marketing.
-
-
-## 🚀 7) Entrare in un progetto (se vuoi)
-
-Se vuoi contribuire attivamente:
-
-* guardi le **Issue aperte**
-* scegli un task chiaro
-* ti assegni o commenti
-
-Non serve “essere dentro”.
-Conta **quello che fai**, non il badge.
-
-
-# 🧠 Regole semplici (per tutti)
-
-* Nessuno è obbligato a fare nulla
-* Nessuno decide da solo
-* Le idee diventano realtà solo se producono output
-* Tutto è pubblico e verificabile
-
-
-# 🧩 In una frase
-
-> Puoi osservare, proporre, migliorare, verificare o usare.
-> Se qualcosa ti sembra utile o sbagliato, puoi dirlo e mostrarlo.
-
-Questo è il DataCivicLab.
-
-Prima di iniziare, leggi il [WORKFLOW.md](WORKFLOW.md).
-
+Per quei contenuti, fai riferimento ai repository dedicati.

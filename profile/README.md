@@ -1,41 +1,24 @@
-# 🌍 DataCivicLab
+# DataCivicLab
 
-Un laboratorio open che trasforma dati pubblici in comprensione civica strutturata.
+DataCivicLab e' un laboratorio civico che usa dati pubblici, strumenti aperti e collaborazione trasparente per produrre comprensione condivisa.
 
-Non produciamo opinioni.  
-Produciamo metodo.
+## Dove iniziare
 
-## 🧠 Cosa facciamo
+- `dataciviclab`: hub pubblico e indice dell'organizzazione
+- `toolkit`: motore della pipeline dati
+- `project-template`: base operativa dei repository dataset
 
-- Analizziamo dataset pubblici ufficiali
-- Costruiamo pipeline replicabili
-- Standardizziamo trasformazioni dati
-- Pubbliciamo dashboard verificabili
-- Documentiamo ogni scelta metodologica
+## Come partecipare
 
-## ⚙️ Come lavoriamo
+- `Discussions` per domande, idee e confronto iniziale
+- `Issues` per lavoro concreto da fare
+- `Pull requests` per proporre modifiche
 
-Domanda → Dataset → Pipeline → Analisi → Dashboard
+## Canali
 
-Ogni progetto è documentato e versionato.
+- GitHub Discussions: confronto pubblico e asincrono
+- GitHub Projects: coordinamento operativo dei maintainer
+- Discord: confronto informale e community
+- LinkedIn: aggiornamenti pubblici e visibilita' esterna
 
-## 🏗 Repo principali
-
-- `dataciviclab` → Governance e roadmap
-- `project-template` → Struttura replicabile
-- `toolkit` → Strumenti per pipeline dati (WIP)
-
-## 🚀 Vuoi contribuire?
-
-Cerchiamo:
-
-- Data nerd
-- Analisti civici
-- Sviluppatori
-- Curiosi strutturati
-
-👉 [Esplora le Discussions](https://github.com/orgs/dataciviclab/discussions)  
-👉 [Leggi il Manifesto](https://github.com/dataciviclab/dataciviclab/blob/main/docs/manifesto.md)  
-👉 [Unisciti alla community](https://discord.gg/rAHpuTrYK3)
-
-Costruiamo infrastruttura civica, non solo dashboard.
+Per contribuire, parti dalle discussions o dal repository piu' vicino al tema su cui vuoi lavorare.
