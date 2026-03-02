@@ -1,4 +1,4 @@
-# Contributing
+# 🤝 Contributing
 
 Grazie per voler contribuire a DataCivicLab.
 
@@ -7,7 +7,7 @@ Questa guida serve a orientarti senza farti studiare tutto prima.
 Il Lab e' aperto, ma non caotico.
 C'e' un posto giusto per ogni cosa.
 
-## Da dove partire
+## 🌱 Da dove partire
 
 Se vuoi capire il quadro generale, parti dalla repository `dataciviclab`.
 
@@ -33,7 +33,7 @@ In ogni caso:
 Non serve essere esperti del motore per partecipare.
 Puoi anche partire da una domanda, da una correzione piccola o da un problema ben descritto.
 
-## Flusso minimo
+## 🔄 Flusso minimo
 
 Nell'organizzazione usiamo un flusso semplice:
 
@@ -44,7 +44,7 @@ Nell'organizzazione usiamo un flusso semplice:
 Le issue servono a rendere il lavoro visibile.
 Le pull request servono a far entrare i cambiamenti in modo chiaro e revisionabile.
 
-## Cosa usare e quando
+## 🧩 Cosa usare e quando
 
 - `Discussions`: domande, idee, confronto iniziale, orientamento
 - `Issues`: lavoro concreto da fare o problema da risolvere
@@ -57,14 +57,14 @@ GitHub resta il posto dove deve restare la traccia utile.
 
 GitHub Projects puo' essere usato dai maintainer per organizzare il lavoro, ma non sostituisce issue e pull request come traccia pubblica.
 
-## Prima di aprire una PR
+## ✅ Prima di aprire una PR
 
 - controlla se esiste gia' una issue o discussion collegata
 - tieni il cambiamento piccolo e leggibile
 - spiega il perche', non solo il cosa
 - se la modifica e' specifica di un repo, segui le regole di quel repo
 
-## Confini di questa repo
+## 🧱 Confini di questa repo
 
 La repository `.github` definisce il layer comune GitHub dell'organizzazione.
 Non descrive il metodo dati, la pipeline tecnica o la struttura operativa dei repository dataset.

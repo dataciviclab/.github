@@ -1,4 +1,4 @@
-# Code of Conduct
+# 🌿 Code of Conduct
 
 DataCivicLab vuole essere uno spazio pubblico, rispettoso e utile.
 

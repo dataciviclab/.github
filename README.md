@@ -1,4 +1,4 @@
-# DataCivicLab GitHub Commons
+# 🧭 DataCivicLab GitHub Commons
 
 Questa repository raccoglie i file condivisi che definiscono l'esperienza GitHub comune di `dataciviclab`.
 

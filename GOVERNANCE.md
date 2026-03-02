@@ -1,8 +1,8 @@
-# Governance
+# 🧱 Governance
 
 Questo documento riguarda solo la collaborazione cross-repo su GitHub.
 
-## Cosa decide questa repo
+## 📘 Cosa decide questa repo
 
 `.github` definisce gli standard condivisi dell'organizzazione per:
 
@@ -18,7 +18,7 @@ Non definisce:
 - metodo dati
 - scelte tecniche del `toolkit`
 
-## Ruoli pratici
+## 👥 Ruoli pratici
 
 - `Maintainer`: cura ordine, moderazione, review e coerenza minima tra repository
 - `Contributor`: propone, discute e implementa cambiamenti
@@ -26,7 +26,7 @@ Non definisce:
 
 I ruoli non sono identita' fisse. Contano responsabilita' e contributi concreti.
 
-## Come prendiamo decisioni su GitHub
+## 🗂️ Come prendiamo decisioni su GitHub
 
 Quando possibile:
 
