@@ -2,11 +2,14 @@
 
 Grazie per voler contribuire a DataCivicLab.
 
-Questa guida spiega come entrare in modo semplice nei repository dell'organizzazione senza duplicare la documentazione specifica dei singoli progetti.
+Questa guida serve a orientarti senza farti studiare tutto prima.
+
+Il Lab e' aperto, ma non caotico.
+C'e' un posto giusto per ogni cosa.
 
 ## Da dove partire
 
-Se vuoi capire il contesto generale, parti dalla repository `dataciviclab`.
+Se vuoi capire il quadro generale, parti dalla repository `dataciviclab`.
 
 Se vuoi contribuire all'organizzazione nel suo insieme:
 
@@ -14,7 +17,7 @@ Se vuoi contribuire all'organizzazione nel suo insieme:
 - guarda [Open Board](https://github.com/orgs/dataciviclab/projects/5) per il lavoro in corso
 - guarda [Roadmap](https://github.com/orgs/dataciviclab/projects/2) per capire direzione, progetti e milestone
 
-Se vuoi contribuire a un repository specifico, usa questa regola semplice:
+Se invece vuoi contribuire a un repository specifico, usa questa regola semplice:
 
 - `toolkit`: se vuoi lavorare sul motore tecnico della pipeline dati
 - `project-template`: se vuoi migliorare il template operativo da cui nascono i repo dataset
@@ -26,6 +29,9 @@ In ogni caso:
 - leggi il `README.md` del repository
 - controlla issue e discussions aperte
 - verifica se esistono istruzioni locali aggiuntive
+
+Non serve essere esperti del motore per partecipare.
+Puoi anche partire da una domanda, da una correzione piccola o da un problema ben descritto.
 
 ## Flusso minimo
 

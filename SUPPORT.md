@@ -1,6 +1,7 @@
 # Support
 
-Usa il canale giusto in base a quello che ti serve.
+Non serve sapere tutto subito.
+Serve solo scegliere il canale giusto per quello che ti serve.
 
 ## Dove scrivere
 
@@ -9,8 +10,10 @@ Usa il canale giusto in base a quello che ti serve.
 - `Pull requests`: proposta di modifica gia' pronta
 - [`Open Board`](https://github.com/orgs/dataciviclab/projects/5): per vedere il lavoro in corso, i task aperti e i blocchi
 - [`Roadmap`](https://github.com/orgs/dataciviclab/projects/2): per vedere direzione pubblica, progetti e milestone
-- `Discord`: scambio rapido e informale tra persone della community
+- [`Discord`](https://discord.gg/rAHpuTrYK3): scambio rapido, community ed eventi, ma non fonte canonica
 - `LinkedIn`: aggiornamenti pubblici, non supporto operativo
+
+Se hai un dubbio e non sai dove andare, la scelta piu' sicura e' iniziare da GitHub Discussions.
 
 ## Prima di aprire qualcosa
 

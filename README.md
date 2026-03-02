@@ -2,6 +2,9 @@
 
 Questa repository raccoglie i file condivisi che definiscono l'esperienza GitHub comune di `dataciviclab`.
 
+Non e' l'hub pubblico del Lab.
+E' il posto in cui teniamo ordine su GitHub.
+
 Qui vivono:
 
 - community health files
