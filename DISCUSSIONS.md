@@ -1,6 +1,7 @@
 # Discussions e Projects
 
 Le GitHub Discussions sono il posto giusto quando serve parlare prima di implementare.
+Sono il posto giusto anche quando non hai ancora capito tutto ma vuoi lasciare una traccia chiara.
 
 Usale per:
 
