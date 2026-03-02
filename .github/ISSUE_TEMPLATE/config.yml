@@ -1,5 +1,11 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
-  - name: 💬 Discussions
-    url: https://github.com/dataciviclab/dataciviclab/discussions
-    about: Per idee, metodo e confronto usa le Discussions.
+  - name: Discussions
+    url: https://github.com/orgs/dataciviclab/discussions
+    about: Usa le discussions per domande, idee e orientamento.
+  - name: Support
+    url: https://github.com/dataciviclab/.github/blob/main/SUPPORT.md
+    about: Leggi la guida rapida ai canali di supporto.
+  - name: Security
+    url: https://github.com/dataciviclab/.github/blob/main/SECURITY.md
+    about: Non usare issue pubbliche per vulnerabilita' o contenuti sensibili.

@@ -1,0 +1,39 @@
+name: Bug report
+description: Segnala un problema chiaro e riproducibile
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema
+      description: Descrivi cosa non funziona
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Come riprodurlo
+      description: Elenca i passaggi minimi per vedere il problema
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: repo
+    attributes:
+      label: Repository coinvolto
+      placeholder: es. toolkit, project-template, nome repo dataset
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento atteso
+      description: Cosa ti aspettavi
+  - type: textarea
+    id: context
+    attributes:
+      label: Contesto utile
+      description: Link, screenshot o riferimenti che aiutano a capire

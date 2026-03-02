@@ -1,0 +1,28 @@
+title: "[Idea] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Usa questo template per proporre un'idea prima di aprire una issue operativa.
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea
+      description: Descrivi la proposta in modo semplice
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Perche' potrebbe essere utile
+      description: Quale bisogno o opportunita' vedi
+  - type: input
+    id: repo
+    attributes:
+      label: Repository coinvolto
+      placeholder: Se lo sai gia'
+  - type: textarea
+    id: next
+    attributes:
+      label: Prossimo passo possibile
+      description: Cosa servirebbe per trasformarla in issue
