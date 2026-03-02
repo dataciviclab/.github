@@ -14,6 +14,8 @@ DataCivicLab e' un laboratorio civico che usa dati pubblici, strumenti aperti e 
 - `Issues` per lavoro concreto da fare
 - `Pull requests` per proporre modifiche
 
+Le Discussions di riferimento sono quelle dell'organizzazione `dataciviclab`.
+
 ## Canali
 
 - GitHub Discussions: confronto pubblico e asincrono

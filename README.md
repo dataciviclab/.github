@@ -19,3 +19,4 @@ Qui non vivono:
 - bootstrap operativo dei repository dataset
 
 Per il contesto generale del Lab e l'indice dell'ecosistema, il punto di ingresso resta la repository `dataciviclab`.
+Per domande e confronto pubblico trasversale, il punto di ingresso resta GitHub Discussions dell'organizzazione.

@@ -4,7 +4,7 @@ Usa il canale giusto in base a quello che ti serve.
 
 ## Dove scrivere
 
-- `GitHub Discussions`: domande, idee, orientamento, confronto pubblico
+- `GitHub Discussions`: domande, idee, orientamento e confronto pubblico nell'org `dataciviclab`
 - `Issues`: bug, problemi chiari, attivita' da svolgere
 - `Pull requests`: proposta di modifica gia' pronta
 - `Discord`: scambio rapido e informale tra persone della community
@@ -14,6 +14,7 @@ Usa il canale giusto in base a quello che ti serve.
 
 - controlla se esiste gia' una issue o discussion simile
 - scegli il repository corretto
+- se ti serve solo orientamento, parti dalle Discussions dell'organizzazione
 - se il tema riguarda metodo dati o implementazione tecnica, usa il repository dedicato
 
 ## Sicurezza e comportamento

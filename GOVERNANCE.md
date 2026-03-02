@@ -35,3 +35,4 @@ Quando possibile:
 3. la decisione finale viene resa visibile nella pull request o nell'issue collegata
 
 Se una decisione riguarda un solo repository, vale la documentazione di quel repository.
+Se invece riguarda il modo in cui l'organizzazione usa GitHub, il riferimento canonico e' questa repo.
