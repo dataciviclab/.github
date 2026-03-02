@@ -9,6 +9,7 @@ Qui vivono:
 - template per issue, pull request e discussions
 - profilo pubblico dell'organizzazione
 - istruzioni minime su supporto, sicurezza e canali
+- orientamento leggero su Discussions e Projects pubblici
 
 Qui non vivono:
 
@@ -19,4 +20,6 @@ Qui non vivono:
 - bootstrap operativo dei repository dataset
 
 Per il contesto generale del Lab e l'indice dell'ecosistema, il punto di ingresso resta la repository `dataciviclab`.
-Per domande e confronto pubblico trasversale, il punto di ingresso resta GitHub Discussions dell'organizzazione.
+Per domande e confronto pubblico trasversale, il punto di ingresso resta [GitHub Discussions](https://github.com/orgs/dataciviclab/discussions) dell'organizzazione.
+Per seguire il lavoro in corso, il riferimento e' [Open Board](https://github.com/orgs/dataciviclab/projects/5).
+Per vedere direzione, progetti e milestone, il riferimento e' [Roadmap](https://github.com/orgs/dataciviclab/projects/2).

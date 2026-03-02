@@ -8,9 +8,22 @@ Questa guida spiega come entrare in modo semplice nei repository dell'organizzaz
 
 Se vuoi capire il contesto generale, parti dalla repository `dataciviclab`.
 
-Se vuoi contribuire a un repository specifico:
+Se vuoi contribuire all'organizzazione nel suo insieme:
 
-- leggi il suo `README.md`
+- parti dalle [Discussions](https://github.com/orgs/dataciviclab/discussions) dell'org
+- guarda [Open Board](https://github.com/orgs/dataciviclab/projects/5) per il lavoro in corso
+- guarda [Roadmap](https://github.com/orgs/dataciviclab/projects/2) per capire direzione, progetti e milestone
+
+Se vuoi contribuire a un repository specifico, usa questa regola semplice:
+
+- `toolkit`: se vuoi lavorare sul motore tecnico della pipeline dati
+- `project-template`: se vuoi migliorare il template operativo da cui nascono i repo dataset
+- repo progetto o dataset: se vuoi lavorare su un progetto concreto
+- `.github`: se vuoi migliorare policy condivise, onboarding, template o profilo pubblico GitHub
+
+In ogni caso:
+
+- leggi il `README.md` del repository
 - controlla issue e discussions aperte
 - verifica se esistono istruzioni locali aggiuntive
 
@@ -30,6 +43,11 @@ Le pull request servono a far entrare i cambiamenti in modo chiaro e revisionabi
 - `Discussions`: domande, idee, confronto iniziale, orientamento
 - `Issues`: lavoro concreto da fare o problema da risolvere
 - `Pull requests`: proposta di modifica pronta da rivedere
+- `Open Board`: vista pubblica del lavoro in corso
+- `Roadmap`: vista pubblica di direzione, progetti e prossime tappe
+- `Discord`: scambio veloce o informale, non traccia canonica
+
+GitHub resta il posto dove deve restare la traccia utile.
 
 GitHub Projects puo' essere usato dai maintainer per organizzare il lavoro, ma non sostituisce issue e pull request come traccia pubblica.
 

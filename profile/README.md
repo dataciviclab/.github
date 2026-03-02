@@ -18,8 +18,9 @@ Le Discussions di riferimento sono quelle dell'organizzazione `dataciviclab`.
 
 ## Canali
 
-- GitHub Discussions: confronto pubblico e asincrono
-- GitHub Projects: coordinamento operativo dei maintainer
+- [GitHub Discussions](https://github.com/orgs/dataciviclab/discussions): confronto pubblico e asincrono
+- [Open Board](https://github.com/orgs/dataciviclab/projects/5): lavoro in corso, task, blocchi e attivita' operative
+- [Roadmap](https://github.com/orgs/dataciviclab/projects/2): direzione pubblica, progetti e milestone
 - Discord: confronto informale e community
 - LinkedIn: aggiornamenti pubblici e visibilita' esterna
 
