@@ -7,9 +7,9 @@ Serve solo capire da dove iniziare.
 
 ## 🌱 Dove iniziare
 
-- `dataciviclab`: hub pubblico e umano dell'organizzazione
-- `toolkit`: motore tecnico della pipeline dati
-- `project-template`: base operativa dei repository dataset
+- [`dataciviclab`](https://github.com/dataciviclab/dataciviclab): hub pubblico e umano dell'organizzazione
+- [`toolkit`](https://github.com/dataciviclab/toolkit): motore tecnico della pipeline dati
+- [`project-template`](https://github.com/dataciviclab/project-template): base operativa dei repository dataset
 
 ## 🤝 Come partecipare
 
