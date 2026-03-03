@@ -18,3 +18,5 @@ Perché è necessario?
 
 ## 🔗 Collegamenti
 Issue correlate / Discussion / PR
+
+Se il task nasce da una domanda civica o da una proposta di analisi, collega qui la Discussion di origine.

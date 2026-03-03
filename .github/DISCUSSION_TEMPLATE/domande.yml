@@ -4,13 +4,22 @@ body:
     id: perche
     attributes:
       label: 🎯 Perché questa domanda è rilevante?
+      description: Spiega il problema pubblico o civico che vuoi capire meglio.
 
   - type: textarea
     id: metriche
     attributes:
       label: 📏 Metriche possibili
+      description: Indica dati, indicatori o confronti che potrebbero aiutare a rispondere.
 
   - type: textarea
     id: ipotesi
     attributes:
       label: 🧠 Ipotesi iniziali
+      description: Se hai gia' un'idea, esplicitala. Se non l'hai, va bene comunque.
+
+  - type: textarea
+    id: next_step
+    attributes:
+      label: 🔁 Se diventa lavoro concreto
+      description: Indica in quale repo dovrebbe nascere una issue operativa e quale sarebbe il primo output utile.

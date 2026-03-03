@@ -26,3 +26,18 @@ Per il contesto generale del Lab e l'indice dell'ecosistema, il punto di ingress
 Per domande e confronto pubblico trasversale, il punto di ingresso resta [GitHub Discussions](https://github.com/orgs/dataciviclab/discussions) dell'organizzazione.
 Per seguire il lavoro in corso, il riferimento e' [Open Board](https://github.com/orgs/dataciviclab/projects/5).
 Per vedere direzione, progetti e milestone, il riferimento e' [Roadmap](https://github.com/orgs/dataciviclab/projects/2).
+
+## Flusso consigliato
+
+Su GitHub cerchiamo di tenere distinti i livelli:
+
+- **Discussions** per formulare domande civiche, proposte, interpretazioni e bisogno informativo
+- **Issues** per il lavoro operativo che ne deriva
+- **PR** per le modifiche effettive a codice, documentazione o progetto
+
+In breve:
+
+`Discussion -> Issue -> PR`
+
+Non tutte le issue nascono da una discussion.
+Ma quando il punto di partenza e una domanda civica o una proposta di analisi, la discussion e il posto giusto per iniziare.
