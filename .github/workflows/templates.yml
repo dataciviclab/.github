@@ -1,0 +1,56 @@
+name: Templates
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate-templates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install PyYAML
+        run: python -m pip install pyyaml
+
+      - name: Validate discussion and issue templates
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+
+          root = Path(".").resolve() / ".github"
+          errors = []
+
+          for path in sorted((root / "DISCUSSION_TEMPLATE").glob("*.yml")):
+              try:
+                  yaml.safe_load(path.read_text(encoding="utf-8"))
+              except Exception as exc:
+                  errors.append(f"{path.relative_to(root.parent)}: {exc}")
+
+          for path in sorted((root / "ISSUE_TEMPLATE").glob("*.md")):
+              text = path.read_text(encoding="utf-8")
+              if not text.startswith("---"):
+                  errors.append(f"{path.relative_to(root.parent)}: missing frontmatter start")
+                  continue
+              parts = text.split("---", 2)
+              if len(parts) < 3:
+                  errors.append(f"{path.relative_to(root.parent)}: invalid frontmatter")
+                  continue
+              frontmatter = parts[1]
+              try:
+                  yaml.safe_load(frontmatter)
+              except Exception as exc:
+                  errors.append(f"{path.relative_to(root.parent)}: {exc}")
+
+          if errors:
+              raise SystemExit("Template validation failed:\n" + "\n".join(errors))
+          PY
