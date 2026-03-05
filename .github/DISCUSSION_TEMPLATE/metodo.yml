@@ -8,20 +8,20 @@ body:
   - type: textarea
     id: contesto
     attributes:
-      label: 🧩 Contesto
+      label: Contesto
       required: true
 
   - type: textarea
     id: scelta
     attributes:
-      label: ⚙ Proposta metodologica
+      label: Proposta metodologica
 
   - type: textarea
     id: alternative
     attributes:
-      label: 🔄 Alternative valutate
+      label: Alternative valutate
 
   - type: textarea
     id: impatto
     attributes:
-      label: 📊 Impatto su replicabilità e confronto
+      label: Impatto su replicabilità e confronto
