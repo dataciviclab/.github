@@ -1,12 +1,18 @@
-# Security Policy
+# Security
 
-Non pubblicare:
-- dati personali non anonimizzati
+Se trovi una vulnerabilita', non aprire una issue pubblica.
+
+Usa GitHub Security Advisories se disponibili per il repository coinvolto. Se non sono disponibili, contatta in privato i maintainer del repository interessato prima di pubblicare dettagli.
+
+Usa i canali pubblici solo per:
+
+- domande generali di sicurezza
+- chiarimenti non sensibili
+- miglioramenti di documentazione
+
+Non pubblicare mai:
+
 - credenziali
-- informazioni sensibili
-
-Per segnalazioni di sicurezza:
-- aprire una Issue privata se possibile
-- oppure contattare i maintainer
-
-Grazie per aiutarci a mantenere il Lab sicuro.
+- token
+- dati personali
+- dettagli che facilitano uno sfruttamento immediato del problema

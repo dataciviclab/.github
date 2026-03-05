@@ -1,15 +1,21 @@
-# Code of Conduct
+# 🌿 Code of Conduct
 
-Il DataCivicLab è uno spazio collaborativo e rispettoso.
+DataCivicLab vuole essere uno spazio pubblico, rispettoso e utile.
 
 Ci aspettiamo:
-- rispetto reciproco
-- confronto basato su fatti e dati
-- zero attacchi personali
 
-Comportamenti inaccettabili:
-- molestie
-- discriminazioni
-- trolling
+- rispetto per le persone e per il loro tempo
+- critiche rivolte alle idee, non alle persone
+- confronto chiaro, documentato e in buona fede
+- attenzione a linguaggio, contesto e accessibilita'
 
-I maintainer possono intervenire per tutelare la community.
+Non sono accettati:
+
+- insulti, attacchi personali o intimidazioni
+- discriminazioni o molestie
+- comportamenti deliberatamente ostili o distruttivi
+- pubblicazione di dati personali, credenziali o informazioni sensibili
+
+I maintainer possono moderare discussioni, chiudere thread o limitare la partecipazione quando serve a proteggere la qualita' dello spazio comune.
+
+Per segnalare un problema di comportamento, usa i riferimenti indicati in [SUPPORT.md](SUPPORT.md).

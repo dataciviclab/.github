@@ -1,41 +1,32 @@
 # 🌍 DataCivicLab
 
-Un laboratorio open che trasforma dati pubblici in comprensione civica strutturata.
+DataCivicLab e' uno spazio civico dove proviamo a rendere i dati pubblici piu' leggibili, utili e condivisibili.
 
-Non produciamo opinioni.  
-Produciamo metodo.
+Non serve capire tutto subito.
+Serve solo capire da dove iniziare.
 
-## 🧠 Cosa facciamo
+## 🌱 Dove iniziare
 
-- Analizziamo dataset pubblici ufficiali
-- Costruiamo pipeline replicabili
-- Standardizziamo trasformazioni dati
-- Pubbliciamo dashboard verificabili
-- Documentiamo ogni scelta metodologica
+- [`dataciviclab`](https://github.com/dataciviclab/dataciviclab): hub pubblico e umano dell'organizzazione
+- [`toolkit`](https://github.com/dataciviclab/toolkit): motore tecnico della pipeline dati
+- [`project-template`](https://github.com/dataciviclab/project-template): base operativa dei repository dataset
 
-## ⚙️ Come lavoriamo
+## 🤝 Come partecipare
 
-Domanda → Dataset → Pipeline → Analisi → Dashboard
+- [GitHub Discussions](https://github.com/orgs/dataciviclab/discussions): per fare domande, proporre idee e parlare con calma lasciando traccia
+- `Issues`: per il lavoro concreto da fare
+- `Pull requests`: per proporre modifiche
 
-Ogni progetto è documentato e versionato.
+Se non sai ancora dove stare, parti dalle Discussions dell'organizzazione.
 
-## 🏗 Repo principali
+## 🔗 Canali
 
-- `dataciviclab` → Governance e roadmap
-- `project-template` → Struttura replicabile
-- `toolkit` → Strumenti per pipeline dati (WIP)
+- [GitHub Discussions](https://github.com/orgs/dataciviclab/discussions): confronto pubblico e asincrono
+- [Open Board](https://github.com/orgs/dataciviclab/projects/5): lavoro in corso, task, blocchi e attivita' operative
+- [Roadmap](https://github.com/orgs/dataciviclab/projects/2): direzione pubblica, progetti e milestone
+- [Discord](https://discord.gg/rAHpuTrYK3): scambio veloce ed eventi, ma non fonte canonica
+- LinkedIn: aggiornamenti pubblici e visibilita' esterna
 
-## 🚀 Vuoi contribuire?
+GitHub resta il posto dove deve restare la traccia utile.
 
-Cerchiamo:
-
-- Data nerd
-- Analisti civici
-- Sviluppatori
-- Curiosi strutturati
-
-👉 [Esplora le Discussions](https://github.com/orgs/dataciviclab/discussions)  
-👉 [Leggi il Manifesto](https://github.com/dataciviclab/dataciviclab/blob/main/docs/manifesto.md)  
-👉 [Unisciti alla community](https://discord.gg/rAHpuTrYK3)
-
-Costruiamo infrastruttura civica, non solo dashboard.
+Per contribuire, parti dal canale o dal repository piu' vicino a quello che vuoi capire o migliorare.

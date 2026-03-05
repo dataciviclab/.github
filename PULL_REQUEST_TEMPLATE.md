@@ -1,36 +1,39 @@
-# 🧾 Pull Request – DataCivicLab
+## Sintesi
 
-## 🔗 Issue collegata
+Spiega in poche righe cosa cambia e perche'.
+
+## Contesto collegato
+
 Closes #
 
-## 🎯 Contesto
-Spiega brevemente perché questa PR è necessaria.
+## Cosa cambia
 
-## ⚙️ Cosa cambia 
-Descrivi in modo sintetico le modifiche introdotte:
-- punto 1
-- punto 2
-- punto 3
+- 
+- 
+- 
 
-## 📊 Impatto su dati / metodo / dashboard
-Indicare se questa PR impatta:
-- [ ] RAW
-- [ ] CLEAN
-- [ ] MART
-- [ ] Dashboard
-- [ ] Metodo
-- [ ] Documentazione
-- [ ] Bugfix
-- [ ] Nessun impatto dati
+## Impatto
 
-Spiega eventuali effetti su replicabilità o confrontabilità.
+Segna solo quello che si applica.
 
-## 🧪 QA Checklist
-- [ ] Ho testato il codice / notebook
-- [ ] Non rompe pipeline esistenti
-- [ ] Naming coerente (snake_case, convenzioni Lab)
-- [ ] Documentazione aggiornata
-- [ ] Ho collegato l’issue corretta
+- [ ] Documentazione o testi
+- [ ] Policy GitHub o template
+- [ ] Codice o automazioni
+- [ ] Pipeline dati o trasformazioni
+- [ ] Contenuti o metadati di dataset
+- [ ] Nessun impatto visibile per chi usa il repository
 
-## 📝 Note per i reviewer
-Segnala punti critici o aspetti che richiedono particolare attenzione
+## Verifica
+
+Spiega come hai verificato il cambiamento. Se non serve, scrivi `N/A`.
+
+## Controlli
+
+- [ ] Questa PR e' nel repository giusto
+- [ ] Ho collegato issue o discussion quando serve
+- [ ] Ho verificato l'impatto su documentazione, codice o dati
+- [ ] Ho aggiornato solo quello che era davvero necessario
+
+## Note per chi revisiona
+
+Segnala qui rischi, limiti o punti su cui vuoi un controllo mirato.
