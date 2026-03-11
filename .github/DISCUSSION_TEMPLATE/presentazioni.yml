@@ -9,7 +9,7 @@ body:
     id: bio
     attributes:
       label: Chi sei
-      description: Breve bio (2-3 righe).
+      description: Breve bio, 2-3 righe.
     validations:
       required: true
 
@@ -17,13 +17,13 @@ body:
     id: competenze
     attributes:
       label: Competenze
-      description: Dati, analisi, visualizzazione, metodo, altro.
+      description: Dati, analisi, visualizzazione, metodo, documentazione o altro.
 
   - type: textarea
     id: interessi
     attributes:
       label: Cosa ti interessa
-      description: Temi civici, dataset, progetti.
+      description: Temi civici, dataset o filoni che ti incuriosiscono di più.
 
   - type: dropdown
     id: disponibilita
@@ -37,4 +37,4 @@ body:
     id: contributo
     attributes:
       label: Come vorresti contribuire
-      description: Discussioni, analisi, doc, QA, altro.
+      description: Discussions, analisi, doc, QA, revisione, altro.

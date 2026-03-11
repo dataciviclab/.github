@@ -1,28 +1,54 @@
-title: "[Dataset] Nome dataset"
+title: "[Dataset] Nome dataset o fonte"
 body:
   - type: markdown
     attributes:
       value: |
-        Usa questo template per discutere una nuova fonte dati prima di aprire una Issue operativa.
+        Usa questo template per suggerire una nuova fonte dati o portare un dataset in intake.
+
+        Non serve avere già un progetto completo: basta una fonte buona, una possibile domanda e un motivo per cui vale la pena guardarla.
 
   - type: input
     id: fonte
     attributes:
       label: Fonte ufficiale
-      placeholder: URL dataset
+      placeholder: URL dataset o pagina ufficiale
+    validations:
+      required: true
 
   - type: textarea
     id: descrizione
     attributes:
       label: Cosa contiene?
-      description: Descrizione sintetica del dataset
+      description: Descrizione breve del dataset o della fonte.
+    validations:
+      required: true
 
   - type: textarea
-    id: struttura
+    id: perche_rileva
     attributes:
-      label: Struttura dati
+      label: Perché è rilevante?
+      description: Spiega perché questa fonte potrebbe essere utile per il Lab o per una domanda civica.
+
+  - type: textarea
+    id: domanda_potenziale
+    attributes:
+      label: Domanda civica possibile
+      description: Se questo dataset fosse utile, quale domanda concreta potremmo provare a fare?
+
+  - type: textarea
+    id: copertura
+    attributes:
+      label: Copertura e granularità
+      description: Indica periodo, livello geografico o unità di analisi se li conosci.
+
+  - type: input
+    id: formato
+    attributes:
+      label: Formato
+      placeholder: CSV, XLSX, API, ZIP, PDF, altro
 
   - type: textarea
     id: criticita
     attributes:
-      label: Limiti o rischi
+      label: Limiti o rischi noti
+      description: Se vedi problemi, vincoli o ambiguità, segnalali qui.

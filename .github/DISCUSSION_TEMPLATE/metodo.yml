@@ -3,25 +3,30 @@ body:
   - type: markdown
     attributes:
       value: |
-        Usa questo template per discutere scelte metodologiche prima di implementarle.
+        Usa questo template per discutere scelte metodologiche prima di implementarle o promuoverle.
 
   - type: textarea
     id: contesto
     attributes:
       label: Contesto
+      description: Spiega il caso, il dataset o il filone in cui nasce il dubbio.
+    validations:
       required: true
 
   - type: textarea
     id: scelta
     attributes:
       label: Proposta metodologica
+      description: Qual è la scelta che stai proponendo?
 
   - type: textarea
     id: alternative
     attributes:
       label: Alternative valutate
+      description: Quali alternative hai considerato e perché non ti convincono del tutto?
 
   - type: textarea
     id: impatto
     attributes:
       label: Impatto su replicabilità e confronto
+      description: Spiega come questa scelta cambia confrontabilità, interpretazione o riproducibilità.

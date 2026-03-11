@@ -3,7 +3,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Usa questo template per proporre un **nuovo progetto** del DataCivicLab.
+        Usa questo template per proporre un nuovo filone già abbastanza maturo da essere discusso come progetto.
+
+        Se hai solo una fonte dati o una domanda iniziale, usa prima i template `Dataset` o `Domanda`.
 
   - type: textarea
     id: domanda
@@ -25,16 +27,22 @@ body:
     id: dataset
     attributes:
       label: Dataset coinvolti
-      description: Dataset - Fonte - Periodo - Livello.
+      description: Dataset, fonte, periodo, livello o unità di analisi.
+
+  - type: textarea
+    id: stato_attuale
+    attributes:
+      label: Stato attuale
+      description: Cosa esiste già? Es. intake, preanalysis privata, notebook v0, output minimo.
 
   - type: dropdown
     id: output
     attributes:
       label: Output previsto
       options:
-        - Dashboard
-        - Report
-        - Pagina pubblica
+        - Discussion / preanalysis
+        - Report / nota
+        - Dashboard / pagina pubblica
         - Altro
 
   - type: dropdown
@@ -45,13 +53,3 @@ body:
         - Bassa
         - Media
         - Alta
-
-  - type: dropdown
-    id: stato
-    attributes:
-      label: Stato
-      options:
-        - Idea
-        - In discussione
-        - Pronto per Issue
-        - In corso

@@ -1,10 +1,23 @@
 title: "[Domanda] Quesito analitico"
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Usa questo template per proporre o chiarire una domanda civica, anche se il dataset non è ancora deciso del tutto.
+
   - type: textarea
     id: perche
     attributes:
       label: Perché questa domanda è rilevante?
       description: Spiega il problema pubblico o civico che vuoi capire meglio.
+    validations:
+      required: true
+
+  - type: textarea
+    id: dataset
+    attributes:
+      label: Dataset o fonti possibili
+      description: Se li conosci, indica i dataset o le fonti che potrebbero aiutare.
 
   - type: textarea
     id: metriche
@@ -22,4 +35,4 @@ body:
     id: next_step
     attributes:
       label: Se diventa lavoro concreto
-      description: Indica in quale repo dovrebbe nascere una issue operativa e quale sarebbe il primo output utile.
+      description: Indica il primo output utile o il primo passo che varrebbe la pena fare.
