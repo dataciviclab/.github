@@ -40,7 +40,6 @@ body:
     attributes:
       label: Output previsto
       options:
-        - Discussion / preanalysis
         - Report / nota
         - Dashboard / pagina pubblica
         - Altro
@@ -49,6 +48,7 @@ body:
     id: complessita
     attributes:
       label: Complessità stimata
+      description: Bassa = qualche giorno, Media = 1-2 settimane, Alta = mesi o più persone.
       options:
         - Bassa
         - Media

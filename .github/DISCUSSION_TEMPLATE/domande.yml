@@ -34,5 +34,5 @@ body:
   - type: textarea
     id: next_step
     attributes:
-      label: Se diventa lavoro concreto
+      label: Primo passo concreto
       description: Indica il primo output utile o il primo passo che varrebbe la pena fare.

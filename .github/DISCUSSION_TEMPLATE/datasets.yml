@@ -11,6 +11,7 @@ body:
     id: fonte
     attributes:
       label: Fonte ufficiale
+      description: URL della pagina o del file ufficiale, per esempio una pagina dataset pubblica o una API documentata.
       placeholder: URL dataset o pagina ufficiale
     validations:
       required: true
@@ -51,4 +52,4 @@ body:
     id: criticita
     attributes:
       label: Limiti o rischi noti
-      description: Se vedi problemi, vincoli o ambiguità, segnalali qui.
+      description: Es. licenza restrittiva, anni mancanti, aggregazione troppo grossolana, dati non machine-readable.

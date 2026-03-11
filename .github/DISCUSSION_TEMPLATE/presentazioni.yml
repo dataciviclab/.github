@@ -32,6 +32,7 @@ body:
       options:
         - Occasionale
         - Continuativa
+        - Non so ancora
 
   - type: textarea
     id: contributo

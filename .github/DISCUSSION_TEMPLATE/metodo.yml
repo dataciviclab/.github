@@ -18,6 +18,8 @@ body:
     attributes:
       label: Proposta metodologica
       description: Qual è la scelta che stai proponendo?
+    validations:
+      required: true
 
   - type: textarea
     id: alternative
