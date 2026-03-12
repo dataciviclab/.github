@@ -7,6 +7,9 @@ body:
 
         Non serve avere già un progetto completo: basta una fonte buona, una possibile domanda e un motivo per cui vale la pena guardarla.
 
+        Se la proposta regge, il passo successivo sarà di solito una issue operativa nel repo giusto.
+        A seconda del caso, il filone potrà passare da `dataset-incubator` per la validazione tecnica oppure entrare direttamente in `dataciviclab/preanalysis`.
+
   - type: input
     id: fonte
     attributes:

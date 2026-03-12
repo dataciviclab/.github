@@ -5,6 +5,8 @@ body:
       value: |
         Usa questo template per proporre o chiarire una domanda civica, anche se il dataset non è ancora deciso del tutto.
 
+        La Discussion serve a chiarire la domanda. Se la proposta matura, il passo successivo sarà una issue operativa e poi il percorso più adatto del Lab: `dataset-incubator` oppure `dataciviclab/preanalysis`.
+
   - type: textarea
     id: perche
     attributes:
