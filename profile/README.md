@@ -1,32 +1,24 @@
-# 🌍 DataCivicLab
+# DataCivicLab
 
-DataCivicLab e' uno spazio civico dove proviamo a rendere i dati pubblici piu' leggibili, utili e condivisibili.
+DataCivicLab è uno spazio civico dove proviamo a rendere i dati pubblici più leggibili, utili e condivisibili.
 
-Non serve capire tutto subito.
-Serve solo capire da dove iniziare.
+Nasce per chi vuole capire meglio il proprio territorio senza perdersi nel rumore, nei tecnicismi o nelle opinioni gridate.
 
-## 🌱 Dove iniziare
+## Cosa abbiamo pubblicato
 
-- [`dataciviclab`](https://github.com/dataciviclab/dataciviclab): hub pubblico e umano dell'organizzazione
-- [`toolkit`](https://github.com/dataciviclab/toolkit): motore tecnico della pipeline dati
-- [`project-template`](https://github.com/dataciviclab/project-template): base operativa dei repository dataset
+- [progetto-pilota](https://github.com/dataciviclab/progetto-pilota) — raccolta differenziata e costi per abitante nei comuni italiani (ISPRA)
+- [openbdap-saldi-storico-stato](https://github.com/dataciviclab/openbdap-saldi-storico-stato) — saldi di bilancio dello Stato 2002-2023 (OpenBDAP/RGS)
 
-## 🤝 Come partecipare
+## Come partecipare
 
-- [GitHub Discussions](https://github.com/orgs/dataciviclab/discussions): per fare domande, proporre idee e parlare con calma lasciando traccia
-- `Issues`: per il lavoro concreto da fare
-- `Pull requests`: per proporre modifiche
+Hai una domanda sui dati pubblici italiani?
+Apri una [Discussion](https://github.com/orgs/dataciviclab/discussions/new) — è il primo passo.
 
-Se non sai ancora dove stare, parti dalle Discussions dell'organizzazione.
+## Canali
 
-## 🔗 Canali
+- [Discussions](https://github.com/orgs/dataciviclab/discussions) — proposte, domande, confronto pubblico
+- [Open Board](https://github.com/orgs/dataciviclab/projects/5) — lavoro in corso
+- [Discord](https://discord.gg/rAHpuTrYK3) — scambio veloce
+- [LinkedIn](https://www.linkedin.com/company/dataciviclab/) — aggiornamenti pubblici
 
-- [GitHub Discussions](https://github.com/orgs/dataciviclab/discussions): confronto pubblico e asincrono
-- [Open Board](https://github.com/orgs/dataciviclab/projects/5): lavoro in corso, task, blocchi e attivita' operative
-- [Roadmap](https://github.com/orgs/dataciviclab/projects/2): direzione pubblica, progetti e milestone
-- [Discord](https://discord.gg/rAHpuTrYK3): scambio veloce ed eventi, ma non fonte canonica
-- LinkedIn: aggiornamenti pubblici e visibilita' esterna
-
-GitHub resta il posto dove deve restare la traccia utile.
-
-Per contribuire, parti dal canale o dal repository piu' vicino a quello che vuoi capire o migliorare.
+La traccia delle decisioni resta su GitHub.
