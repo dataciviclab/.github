@@ -2,8 +2,7 @@
 name: 🐛 Bug
 about: Segnalazione problema tecnico
 title: "[Bug] Descrizione breve"
-label: "bug"
-type: bug
+labels: ["bug"]
 ---
 
 ## 🧾 Problema
