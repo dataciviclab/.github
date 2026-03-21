@@ -1,0 +1,50 @@
+title: "[Analisi] Titolo del filone — aggiornamento"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Usa questo template per pubblicare finding, aggiornamenti o nuovi risultati su un filone gia aperto.
+
+        Non serve che il lavoro sia completo: basta che ci sia qualcosa di leggibile da condividere.
+        Se stai aprendo un filone nuovo, usa invece il template `Dataset` o `Domanda`.
+
+  - type: input
+    id: filone
+    attributes:
+      label: Filone di riferimento
+      description: Slug del filone e link alla Discussion principale, se esiste.
+      placeholder: irpef-comunale — link discussion
+    validations:
+      required: true
+
+  - type: textarea
+    id: finding
+    attributes:
+      label: Cosa e emerso
+      description: Il finding principale in 1-3 frasi. Deve essere leggibile anche da chi non conosce i dati.
+      placeholder: Scrivi il risultato concreto, con numeri se possibile.
+    validations:
+      required: true
+
+  - type: textarea
+    id: limiti
+    attributes:
+      label: Cosa non torna o limiti dichiarati
+      description: Sii esplicito sui caveat. Un finding senza limiti dichiarati e incompleto.
+      placeholder: Anni mancanti, aggregazione troppo grossa, proxy imperfetto, confrontabilita limitata, ecc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: prossima_domanda
+    attributes:
+      label: Prossima domanda aperta
+      description: Cosa vorresti capire meglio dopo questo aggiornamento?
+      placeholder: La domanda che questo risultato lascia aperta o che andrebbe approfondita.
+
+  - type: textarea
+    id: artefatti
+    attributes:
+      label: Artefatti collegati
+      description: Link a notebook, mart, issue, PR o altri output rilevanti.
+      placeholder: Link notebook, issue operativa, PR, export, ecc.
