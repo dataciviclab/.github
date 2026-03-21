@@ -39,3 +39,10 @@ body:
     attributes:
       label: Come vorresti contribuire
       description: Discussions, analisi, doc, QA, revisione, altro.
+
+  - type: textarea
+    id: primo_passo
+    attributes:
+      label: Primo passo concreto
+      description: C'e qualcosa di specifico che vorresti fare subito? Es. commentare una discussion, prendere un task, proporre una fonte, lavorare su un filone gia aperto.
+      placeholder: Anche vago va bene — serve a capire come indirizzarti meglio.

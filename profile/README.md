@@ -31,13 +31,16 @@ Fonte: OpenBDAP/RGS. [Discussioni con risposta dati](https://github.com/datacivi
 
 Tutte le analisi in corso: [dataciviclab/analisi](https://github.com/dataciviclab/dataciviclab/tree/main/analisi)
 
-## Partecipa
+## Come iniziare
 
-Hai una domanda sui dati pubblici italiani?
-Apri una [Discussion](https://github.com/orgs/dataciviclab/discussions/new): è il punto di ingresso per qualsiasi proposta di analisi. Non serve saper programmare.
+**Hai una domanda su un tema civico** (sanita, giustizia, finanza pubblica, ambiente)?
+Apri una [Discussion](https://github.com/orgs/dataciviclab/discussions/new) con la tua domanda. Non serve saper programmare.
 
-Vuoi contribuire a un lavoro in corso?
-Guarda l'[Open Board](https://github.com/orgs/dataciviclab/projects/5) o cerca una [issue aperta](https://github.com/dataciviclab/dataciviclab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
+**Conosci bene un settore** (sei un operatore, un ricercatore, un giornalista)?
+Commenta una delle [analisi in corso](https://github.com/orgs/dataciviclab/discussions): i caveat e il contesto di dominio valgono quanto il codice.
+
+**Sai lavorare con i dati** (Python, SQL, notebook)?
+Guarda le [issue con buon punto di ingresso](https://github.com/dataciviclab/dataciviclab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) o l'[Open Board](https://github.com/orgs/dataciviclab/projects/5) per vedere il lavoro in corso.
 
 ## Canali
 
