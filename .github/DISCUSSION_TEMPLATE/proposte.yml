@@ -33,7 +33,7 @@ body:
     id: stato_attuale
     attributes:
       label: Stato attuale
-      description: Cosa esiste già? Es. intake, preanalysis privata, notebook v0, output minimo.
+      description: Cosa esiste già? Es. intake in dataset-incubator, notebook v0, output minimo, layer in analisi/.
 
   - type: dropdown
     id: output

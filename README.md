@@ -1,4 +1,4 @@
-# 🧭 DataCivicLab GitHub Commons
+# DataCivicLab GitHub Commons
 
 Questa repository raccoglie i file condivisi che definiscono l'esperienza GitHub comune di `dataciviclab`.
 
@@ -12,7 +12,6 @@ Qui vivono:
 - template per issue, pull request e discussions
 - profilo pubblico dell'organizzazione
 - istruzioni minime su supporto, sicurezza e canali
-- orientamento leggero su Discussions e Projects pubblici
 
 Qui non vivono:
 

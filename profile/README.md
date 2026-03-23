@@ -1,32 +1,51 @@
-# 🌍 DataCivicLab
+# DataCivicLab
 
-DataCivicLab e' uno spazio civico dove proviamo a rendere i dati pubblici piu' leggibili, utili e condivisibili.
+DataCivicLab è uno spazio civico dove proviamo a rendere i dati pubblici più leggibili, utili e condivisibili.
 
-Non serve capire tutto subito.
-Serve solo capire da dove iniziare.
+Nasce per chi vuole capire meglio il proprio territorio senza perdersi nel rumore, nei tecnicismi o nelle opinioni gridate.
 
-## 🌱 Dove iniziare
+## Come funziona
 
-- [`dataciviclab`](https://github.com/dataciviclab/dataciviclab): hub pubblico e umano dell'organizzazione
-- [`toolkit`](https://github.com/dataciviclab/toolkit): motore tecnico della pipeline dati
-- [`project-template`](https://github.com/dataciviclab/project-template): base operativa dei repository dataset
+Il percorso è sempre lo stesso: domanda civica, dati pubblici verificabili, metodo documentato, output leggibile.
 
-## 🤝 Come partecipare
+Ogni progetto parte da una domanda che chiunque può capire.
+Il risultato è pubblico e accessibile anche a chi non lavora con i dati.
 
-- [GitHub Discussions](https://github.com/orgs/dataciviclab/discussions): per fare domande, proporre idee e parlare con calma lasciando traccia
-- `Issues`: per il lavoro concreto da fare
-- `Pull requests`: per proporre modifiche
+## Cosa abbiamo pubblicato
 
-Se non sai ancora dove stare, parti dalle Discussions dell'organizzazione.
+**Rifiuti urbani nei comuni italiani**
+In molti comuni la percentuale di raccolta differenziata cresce, ma crescono anche i rifiuti totali prodotti: l'indicatore da solo non basta a valutare la performance ambientale.
+Fonte: ISPRA. [Dashboard interattiva](https://app.powerbi.com/view?r=eyJrIjoiZmE5MTNlZmItN2NkZC00ZTkyLWEwZGItMzE3ZWJkNzI0ZjZjIiwidCI6IjgwNjZmMmRlLTgxZDctNGVjNC04Y2E5LTgzNzVjOTA4NjViNSJ9) · [repo](https://github.com/dataciviclab/progetto-pilota)
 
-## 🔗 Canali
+**Bilancio dello Stato 2003-2024**
+Dal 2003 al 2024 la spesa corrente ha assorbito in media il 64% del bilancio statale. La spesa in conto capitale ha toccato il minimo del 4,9% nel 2015. L'avanzo primario è stato positivo in 16 anni su 22, azzerato ogni volta dagli interessi sul debito.
+Fonte: OpenBDAP/RGS. [Discussioni con risposta dati](https://github.com/dataciviclab/openbdap-saldi-storico-stato/discussions) · [repo](https://github.com/dataciviclab/openbdap-saldi-storico-stato)
 
-- [GitHub Discussions](https://github.com/orgs/dataciviclab/discussions): confronto pubblico e asincrono
-- [Open Board](https://github.com/orgs/dataciviclab/projects/5): lavoro in corso, task, blocchi e attivita' operative
-- [Roadmap](https://github.com/orgs/dataciviclab/projects/2): direzione pubblica, progetti e milestone
-- [Discord](https://discord.gg/rAHpuTrYK3): scambio veloce ed eventi, ma non fonte canonica
-- LinkedIn: aggiornamenti pubblici e visibilita' esterna
+## Cosa stiamo analizzando
 
-GitHub resta il posto dove deve restare la traccia utile.
+- Come varia la capacità fiscale IRPEF tra comuni e regioni? (MEF, 2019-2023)
+- Le regioni con meno personale sanitario hanno tassi di mortalità evitabile più alti? (2022)
+- Il mix elettrico italiano si sta spostando dalle fonti fossili? (Terna, 2020-2024)
+- Il carico della giustizia civile sta migliorando nei territori? (Ministero della Giustizia, 2014-2024)
+- Come cambia il pubblico impiego per comparto? (BDAP, 2021-2023)
 
-Per contribuire, parti dal canale o dal repository piu' vicino a quello che vuoi capire o migliorare.
+Tutte le analisi in corso: [dataciviclab/analisi](https://github.com/dataciviclab/dataciviclab/tree/main/analisi)
+
+## Come iniziare
+
+**Hai una domanda su un tema civico** (sanita, giustizia, finanza pubblica, ambiente)?
+Apri una [Discussion](https://github.com/dataciviclab/dataciviclab/discussions/new) con la tua domanda. Non serve saper programmare.
+
+**Conosci bene un settore** (sei un operatore, un ricercatore, un giornalista)?
+Commenta una delle [analisi in corso](https://github.com/dataciviclab/dataciviclab/discussions): i caveat e il contesto di dominio valgono quanto il codice.
+
+**Sai lavorare con i dati** (Python, SQL, notebook)?
+Guarda le [issue con buon punto di ingresso](https://github.com/dataciviclab/dataciviclab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) o l'[Open Board](https://github.com/orgs/dataciviclab/projects/5) per vedere il lavoro in corso.
+
+## Canali
+
+- [Discussions](https://github.com/dataciviclab/dataciviclab/discussions): proposte, domande, confronto pubblico
+- [Discord](https://discord.gg/rAHpuTrYK3): scambio veloce e community
+- [LinkedIn](https://www.linkedin.com/company/dataciviclab/): aggiornamenti pubblici
+
+La traccia delle decisioni resta su GitHub.
