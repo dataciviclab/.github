@@ -34,17 +34,17 @@ Tutte le analisi in corso: [dataciviclab/analisi](https://github.com/datacivicla
 ## Come iniziare
 
 **Hai una domanda su un tema civico** (sanita, giustizia, finanza pubblica, ambiente)?
-Apri una [Discussion](https://github.com/orgs/dataciviclab/discussions/new) con la tua domanda. Non serve saper programmare.
+Apri una [Discussion](https://github.com/dataciviclab/dataciviclab/discussions/new) con la tua domanda. Non serve saper programmare.
 
 **Conosci bene un settore** (sei un operatore, un ricercatore, un giornalista)?
-Commenta una delle [analisi in corso](https://github.com/orgs/dataciviclab/discussions): i caveat e il contesto di dominio valgono quanto il codice.
+Commenta una delle [analisi in corso](https://github.com/dataciviclab/dataciviclab/discussions): i caveat e il contesto di dominio valgono quanto il codice.
 
 **Sai lavorare con i dati** (Python, SQL, notebook)?
 Guarda le [issue con buon punto di ingresso](https://github.com/dataciviclab/dataciviclab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) o l'[Open Board](https://github.com/orgs/dataciviclab/projects/5) per vedere il lavoro in corso.
 
 ## Canali
 
-- [Discussions](https://github.com/orgs/dataciviclab/discussions): proposte, domande, confronto pubblico
+- [Discussions](https://github.com/dataciviclab/dataciviclab/discussions): proposte, domande, confronto pubblico
 - [Discord](https://discord.gg/rAHpuTrYK3): scambio veloce e community
 - [LinkedIn](https://www.linkedin.com/company/dataciviclab/): aggiornamenti pubblici
 

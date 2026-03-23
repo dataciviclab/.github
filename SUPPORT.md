@@ -1,6 +1,6 @@
 # Support
 
-Se non sai dove andare, inizia dalle [GitHub Discussions](https://github.com/orgs/dataciviclab/discussions).
+Se non sai dove andare, inizia dalle [GitHub Discussions](https://github.com/dataciviclab/dataciviclab/discussions).
 
 Per vulnerabilita' o contenuti sensibili: [SECURITY.md](SECURITY.md).
 
