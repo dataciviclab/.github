@@ -19,16 +19,21 @@ Se vuoi contribuire all'organizzazione nel suo insieme:
 
 Se invece vuoi contribuire a un repository specifico, usa questa regola semplice:
 
-- `toolkit`: se vuoi lavorare sul motore tecnico della pipeline dati
-- `project-template`: se vuoi migliorare il template operativo da cui nascono i repo dataset
-- repo progetto o dataset: se vuoi lavorare su un progetto concreto
-- `.github`: se vuoi migliorare policy condivise, onboarding, template o profilo pubblico GitHub
+- [`dataciviclab`](https://github.com/dataciviclab/dataciviclab): hub pubblico — sito, analisi, documenti, discussioni
+- [`source-observatory`](https://github.com/dataciviclab/source-observatory): scouting e monitoraggio delle fonti pubbliche
+- [`dataset-incubator`](https://github.com/dataciviclab/dataset-incubator): intake tecnico — candidate, pipeline, contratto dati
+- [`toolkit`](https://github.com/dataciviclab/toolkit): motore RAW → CLEAN → MART
+- [`data-explorer`](https://github.com/dataciviclab/data-explorer): catalogo pubblico dei dataset puliti
+- [`lab-dashboard`](https://github.com/dataciviclab/lab-dashboard): dashboard operativa — metriche, fonti, pipeline
+- [`lab-connectors`](https://github.com/dataciviclab/lab-connectors): package Python condiviso (HTTP, GCS, MCP, DuckDB)
+- [`agent-context-builder`](https://github.com/dataciviclab/agent-context-builder): contesto operativo per agenti AI del Lab
+- `.github`: policy condivise, template, codice di condotta, profilo pubblico
 
 In ogni caso:
 
-- leggi il `README.md` del repository
+- leggi il `README.md` del repository e il suo `CONTRIBUTING.md`
 - controlla issue e discussions aperte
-- verifica se esistono istruzioni locali aggiuntive
+- per la guida completa su come contribuire al Lab, vedi [`docs/come-contribuire.md`](https://github.com/dataciviclab/dataciviclab/blob/main/docs/come-contribuire.md) in `dataciviclab`
 
 Non serve essere esperti del motore per partecipare.
 Puoi anche partire da una domanda, da una correzione piccola o da un problema ben descritto.
@@ -70,3 +75,9 @@ La repository `.github` definisce il layer comune GitHub dell'organizzazione.
 Non descrive il metodo dati, la pipeline tecnica o la struttura operativa dei repository dataset.
 
 Per quei contenuti, fai riferimento ai repository dedicati.
+
+## Per approfondire
+
+- [`dataciviclab/docs/come-contribuire.md`](https://github.com/dataciviclab/dataciviclab/blob/main/docs/come-contribuire.md) — guida completa per nuovi contributor
+- [`dataciviclab/docs/dataset-project-flow.md`](https://github.com/dataciviclab/dataciviclab/blob/main/docs/dataset-project-flow.md) — il flusso del Lab dalla domanda all'analisi
+- [`dataciviclab/docs/governance-model.md`](https://github.com/dataciviclab/dataciviclab/blob/main/docs/governance-model.md) — ruoli e come si decide
