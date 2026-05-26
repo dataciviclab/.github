@@ -4,7 +4,7 @@ DataCivicLab è uno spazio civico dove proviamo a rendere i dati pubblici italia
 
 Nasce per chi vuole capire meglio il proprio territorio senza perdersi nel rumore, nei tecnicismi o nelle opinioni gridate.
 
-## I quattro layer del Lab
+## I cinque layer del Lab
 
 | Layer | Cosa fa | Dove |
 |---|---|---|
@@ -12,11 +12,10 @@ Nasce per chi vuole capire meglio il proprio territorio senza perdersi nel rumor
 | **Incubazione** | Contratto tecnico dei dataset (`dataset.yml`, SQL, pipeline) | [`dataset-incubator`](https://github.com/dataciviclab/dataset-incubator) |
 | **Motore** | RAW → CLEAN → MART, motore della pipeline | [`toolkit`](https://github.com/dataciviclab/toolkit) |
 | **Catalogo** | Frontend pubblico sui dataset puliti | [`data-explorer`](https://github.com/dataciviclab/data-explorer) |
+| **Analisi** | Notebook, finding e output pubblico con senso civico | [`dataciviclab`](https://github.com/dataciviclab/dataciviclab) |
 
 Il percorso completo di un filone, dalla domanda civica all'output pubblico,
 è descritto in [dataset-project-flow.md](https://github.com/dataciviclab/dataciviclab/blob/main/docs/dataset-project-flow.md).
-
-Le analisi in corso si trovano in [`dataciviclab/analisi`](https://github.com/dataciviclab/dataciviclab/tree/main/analisi).
 
 ## Come iniziare
 
@@ -28,6 +27,10 @@ Commenta una delle [analisi in corso](https://github.com/dataciviclab/datacivicl
 
 **Sai lavorare con i dati** (Python, SQL, notebook)?
 Guarda le [issue con buon punto di ingresso](https://github.com/dataciviclab/dataciviclab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) o l'[Open Board](https://github.com/orgs/dataciviclab/projects/5).
+
+**Vuoi costruire con noi?**
+Ogni repository del Lab ha un `CONTRIBUTING.md` con le regole specifiche per contribuire.
+La guida generale è in [`.github/CONTRIBUTING.md`](https://github.com/dataciviclab/.github/blob/main/CONTRIBUTING.md).
 
 ## Canali
 
