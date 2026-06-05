@@ -40,9 +40,14 @@ runs:
         python-version: ${{ inputs.python-version }}
         cache: 'pip'
 
-    - name: Install core dependencies
+    - name: Install core dependencies (if requirements.txt exists)
       shell: bash
-      run: python -m pip install -r requirements.txt
+      run: |
+        if [ -f requirements.txt ]; then
+          python -m pip install -r requirements.txt
+        else
+          echo "::notice::No requirements.txt found — skip core install"
+        fi
 
     - name: Install extra requirements files
       if: inputs.extra-requirements != ''
