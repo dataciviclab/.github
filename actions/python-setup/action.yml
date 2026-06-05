@@ -1,0 +1,60 @@
+name: 'Python Setup (org-level)'
+description: |
+  Setup Python 3.12 con pip cache e installa requirements.txt +
+  pacchetti extra opzionali.
+
+  Action org-level disponibile per tutti i repo DataCivicLab.
+  Il checkout deve essere fatto PRIMA di chiamare questa action
+  (le composite action locali non possono contenere actions/checkout).
+
+  Usage:
+    - uses: actions/checkout@v6
+    - uses: dataciviclab/.github/actions/python-setup@main
+      with:
+        extra-packages: ruff mypy
+        extra-requirements: tools/clean-query-mcp/requirements.txt
+
+inputs:
+  python-version:
+    description: Versione Python
+    default: "3.12"
+    required: false
+  extra-packages:
+    description: |
+      Pacchetti pip extra separati da spazio
+      (es. "ruff mypy pytest-cov")
+    default: ""
+    required: false
+  extra-requirements:
+    description: |
+      Path a requirements.txt extra separati da spazio
+      (es. "tools/clean-query-mcp/requirements.txt")
+    default: ""
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: 'pip'
+
+    - name: Install core dependencies
+      shell: bash
+      run: python -m pip install -r requirements.txt
+
+    - name: Install extra requirements files
+      if: inputs.extra-requirements != ''
+      shell: bash
+      run: |
+        for req in ${{ inputs.extra-requirements }}; do
+          if [ -f "$req" ]; then
+            python -m pip install -r "$req"
+          fi
+        done
+
+    - name: Install extra packages
+      if: inputs.extra-packages != ''
+      shell: bash
+      run: python -m pip install ${{ inputs.extra-packages }}
