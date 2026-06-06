@@ -61,8 +61,13 @@ jobs:
             echo "Changed files:"
             echo "$changed"
 
-            # Estrae basename (sort -u per gestire subdir con nomi uguali)
-            files=$(echo "$changed" | xargs -n1 basename | sort -u | tr '\n' ' ')
-
-            audit-test-markers "$dir" --diff --files $files
+            # Ogni file auditato nella propria directory: evita falsi
+            # positivi da basename duplicati in subdirectory diverse
+            # (es. tests/a/test_x.py e tests/b/test_x.py).
+            while IFS= read -r f; do
+              fdir=$(dirname "$f")
+              fbase=$(basename "$f")
+              echo "--- $fdir/ ($fbase) ---"
+              audit-test-markers "$fdir" --diff --files "$fbase"
+            done <<< "$changed"
           done
