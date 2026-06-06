@@ -9,6 +9,20 @@ on:
           Per ogni directory cerca {dir}/test_*.py e {dir}/**/test_*.py.
         required: true
         type: string
+      extra-packages:
+        description: >-
+          Pacchetti pip extra per python-setup.
+          Necessario per repo senza requirements.txt
+          (es. "-e ." o "-e .[dev]").
+        required: false
+        type: string
+        default: ""
+      extra-requirements:
+        description: >-
+          File requirements extra per python-setup.
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -22,6 +36,9 @@ jobs:
           fetch-depth: 0
 
       - uses: dataciviclab/.github/actions/python-setup@main
+        with:
+          extra-packages: ${{ inputs.extra-packages }}
+          extra-requirements: ${{ inputs.extra-requirements }}
 
       - name: Verify audit-test-markers CLI
         run: audit-test-markers --help
@@ -29,13 +46,10 @@ jobs:
       - name: Audit test markers
         shell: bash
         run: |
-          # Parser input test-dirs: itera ogni directory
           for dir in ${{ inputs.test-dirs }}; do
-            # Normalizza: toglie trailing slash
             dir="${dir%/}"
             echo "=== Auditing $dir/ ==="
 
-            # Trova file test modificati in questa directory
             changed=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" \
               -- "$dir/test_*.py" "$dir/**/test_*.py" || true)
 
@@ -47,12 +61,8 @@ jobs:
             echo "Changed files:"
             echo "$changed"
 
-            # Estrae basename per audit-test-markers --files
-            files=""
-            while IFS= read -r f; do
-              base=$(basename "$f")
-              files="$files $base"
-            done <<< "$changed"
+            # Estrae basename (sort -u per gestire subdir con nomi uguali)
+            files=$(echo "$changed" | xargs -n1 basename | sort -u | tr '\n' ' ')
 
             audit-test-markers "$dir" --diff --files $files
           done
