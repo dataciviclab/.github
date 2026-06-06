@@ -1,0 +1,58 @@
+name: Test Marker Audit (reusable)
+on:
+  workflow_call:
+    inputs:
+      test-dirs:
+        description: >-
+          Directory da auditare separate da spazio.
+          Es. "tests" o "tests scripts/collectors".
+          Per ogni directory cerca {dir}/test_*.py e {dir}/**/test_*.py.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  audit-markers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: dataciviclab/.github/actions/python-setup@main
+
+      - name: Verify audit-test-markers CLI
+        run: audit-test-markers --help
+
+      - name: Audit test markers
+        shell: bash
+        run: |
+          # Parser input test-dirs: itera ogni directory
+          for dir in ${{ inputs.test-dirs }}; do
+            # Normalizza: toglie trailing slash
+            dir="${dir%/}"
+            echo "=== Auditing $dir/ ==="
+
+            # Trova file test modificati in questa directory
+            changed=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" \
+              -- "$dir/test_*.py" "$dir/**/test_*.py" || true)
+
+            if [ -z "$changed" ]; then
+              echo "No test files changed in $dir/. OK."
+              continue
+            fi
+
+            echo "Changed files:"
+            echo "$changed"
+
+            # Estrae basename per audit-test-markers --files
+            files=""
+            while IFS= read -r f; do
+              base=$(basename "$f")
+              files="$files $base"
+            done <<< "$changed"
+
+            audit-test-markers "$dir" --diff --files $files
+          done
