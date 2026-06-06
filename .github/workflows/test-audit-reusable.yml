@@ -1,0 +1,73 @@
+name: Test Marker Audit (reusable)
+on:
+  workflow_call:
+    inputs:
+      test-dirs:
+        description: >-
+          Directory da auditare separate da spazio.
+          Es. "tests" o "tests scripts/collectors".
+          Per ogni directory cerca {dir}/test_*.py e {dir}/**/test_*.py.
+        required: true
+        type: string
+      extra-packages:
+        description: >-
+          Pacchetti pip extra per python-setup.
+          Necessario per repo senza requirements.txt
+          (es. "-e ." o "-e .[dev]").
+        required: false
+        type: string
+        default: ""
+      extra-requirements:
+        description: >-
+          File requirements extra per python-setup.
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  audit-markers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: dataciviclab/.github/actions/python-setup@main
+        with:
+          extra-packages: ${{ inputs.extra-packages }}
+          extra-requirements: ${{ inputs.extra-requirements }}
+
+      - name: Verify audit-test-markers CLI
+        run: audit-test-markers --help
+
+      - name: Audit test markers
+        shell: bash
+        run: |
+          for dir in ${{ inputs.test-dirs }}; do
+            dir="${dir%/}"
+            echo "=== Auditing $dir/ ==="
+
+            changed=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" \
+              -- "$dir/test_*.py" "$dir/**/test_*.py" || true)
+
+            if [ -z "$changed" ]; then
+              echo "No test files changed in $dir/. OK."
+              continue
+            fi
+
+            echo "Changed files:"
+            echo "$changed"
+
+            # Ogni file auditato nella propria directory: evita falsi
+            # positivi da basename duplicati in subdirectory diverse
+            # (es. tests/a/test_x.py e tests/b/test_x.py).
+            while IFS= read -r f; do
+              fdir=$(dirname "$f")
+              fbase=$(basename "$f")
+              echo "--- $fdir/ ($fbase) ---"
+              audit-test-markers "$fdir" --diff --files "$fbase"
+            done <<< "$changed"
+          done
