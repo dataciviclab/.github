@@ -17,16 +17,29 @@ Nasce per chi vuole capire meglio il proprio territorio senza perdersi nel rumor
 Il percorso completo di un filone, dalla domanda civica all'output pubblico,
 è descritto in [dataset-project-flow.md](https://github.com/dataciviclab/dataciviclab/blob/main/docs/dataset-project-flow.md).
 
+## Dati pubblicati
+
+Il Lab pubblica dati aperti e interrogabili per tema:
+
+| Tema | Repo |
+|---|---|
+| **Spesa pubblica** | [`open-siope`](https://github.com/dataciviclab/open-siope) · [`partecipate-monitor`](https://github.com/dataciviclab/partecipate-monitor) |
+| **Lavoro pubblico** | [`open-conto-annuale`](https://github.com/dataciviclab/open-conto-annuale) |
+| **Economia e imprese** | [`rna-aiuti-stato`](https://github.com/dataciviclab/rna-aiuti-stato) · [`eurostat`](https://github.com/dataciviclab/eurostat) |
+| **Diritto e legislazione** | [`costituzione-italiana`](https://github.com/dataciviclab/costituzione-italiana) · [`italia-corpus`](https://github.com/dataciviclab/italia-corpus) · [`senato-akn`](https://github.com/dataciviclab/senato-akn) |
+| **Territorio** | [`dcl-bologna`](https://github.com/dataciviclab/dcl-bologna) |
+
+
 ## Come iniziare
 
 **Hai una domanda su un tema civico** (sanità, giustizia, finanza pubblica, ambiente)?
 Apri una [Discussion](https://github.com/dataciviclab/dataciviclab/discussions/new) con la tua domanda. Non serve saper programmare.
 
 **Conosci bene un settore** (operatore, ricercatore, giornalista)?
-Commenta una delle [analisi in corso](https://github.com/dataciviclab/dataciviclab/discussions): i caveat e il contesto di dominio valgono quanto il codice.
+Commenta una delle [discussioni](https://github.com/dataciviclab/dataciviclab/discussions): i caveat e il contesto di dominio valgono quanto il codice.
 
 **Sai lavorare con i dati** (Python, SQL, notebook)?
-Guarda le [issue con buon punto di ingresso](https://github.com/dataciviclab/dataciviclab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) o l'[Open Board](https://github.com/orgs/dataciviclab/projects/5).
+Guarda le [issue con buon punto di ingresso](https://github.com/dataciviclab/dataciviclab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22), l'[Open Board](https://github.com/orgs/dataciviclab/projects/5) o la [Roadmap](https://github.com/orgs/dataciviclab/projects/2).
 
 **Vuoi costruire con noi?**
 Ogni repository del Lab ha un `CONTRIBUTING.md` con le regole specifiche per contribuire.
