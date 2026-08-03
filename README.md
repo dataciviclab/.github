@@ -1,11 +1,11 @@
 # DataCivicLab GitHub Commons
 
-Questa repository raccoglie i file condivisi che definiscono l'esperienza GitHub comune di `dataciviclab`.
+Questa repository raccoglie i file condivisi che definiscono l'esperienza
+GitHub comune di `dataciviclab`.
 
-Non e' l'hub pubblico del Lab.
-E' il posto in cui teniamo ordine su GitHub.
+Non è l'hub pubblico del Lab. È il posto in cui teniamo ordine su GitHub.
 
-Qui vivono:
+## Qui vivono
 
 - community health files
 - policy comuni di collaborazione
@@ -13,7 +13,7 @@ Qui vivono:
 - profilo pubblico dell'organizzazione
 - istruzioni minime su supporto, sicurezza e canali
 
-Qui non vivono:
+## Qui non vivono
 
 - cataloghi dataset
 - roadmap del Lab
@@ -21,22 +21,27 @@ Qui non vivono:
 - documentazione tecnica del toolkit
 - bootstrap operativo dei repository dataset
 
-Per il contesto generale del Lab e l'indice dell'ecosistema, il punto di ingresso resta la repository `dataciviclab`.
-Per domande e confronto pubblico trasversale, il punto di ingresso resta [GitHub Discussions](https://github.com/orgs/dataciviclab/discussions) dell'organizzazione.
-Per seguire il lavoro in corso, il riferimento e' [Open Board](https://github.com/orgs/dataciviclab/projects/5).
-Per vedere direzione, progetti e milestone, il riferimento e' [Roadmap](https://github.com/orgs/dataciviclab/projects/2).
+## Dove andare per...
+
+| Cosa cerchi | Dove |
+|---|---|
+| Contesto generale del Lab | [`dataciviclab`](https://github.com/dataciviclab/dataciviclab) |
+| Domande e confronto pubblico | [GitHub Discussions](https://github.com/orgs/dataciviclab/discussions) |
+| Lavoro in corso | [Open Board](https://github.com/orgs/dataciviclab/projects/5) |
+| Direzione e milestone | [Roadmap](https://github.com/orgs/dataciviclab/projects/2) |
 
 ## Flusso consigliato
 
-Su GitHub cerchiamo di tenere distinti i livelli:
+Su GitHub teniamo distinti i livelli:
 
-- **Discussions** per formulare domande civiche, proposte, interpretazioni e bisogno informativo
-- **Issues** per il lavoro operativo che ne deriva
-- **PR** per le modifiche effettive a codice, documentazione o progetto
+- **Discussions** — domande civiche, proposte, interpretazioni, bisogno informativo
+- **Issues** — il lavoro operativo che ne deriva
+- **PR** — le modifiche effettive a codice, documentazione o progetto
 
-In breve:
+```
+Discussion → Issue → PR
+```
 
-`Discussion -> Issue -> PR`
-
-Non tutte le issue nascono da una discussion.
-Ma quando il punto di partenza e una domanda civica o una proposta di analisi, la discussion e il posto giusto per iniziare.
+Non tutte le issue nascono da una discussion. Ma quando il punto di partenza è
+una domanda civica o una proposta di analisi, la discussion è il posto giusto
+per iniziare.
