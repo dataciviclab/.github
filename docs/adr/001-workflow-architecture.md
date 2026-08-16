@@ -130,8 +130,9 @@ e `manifest-smoke-weekly` (catalog manifest GCS).
 ## Implementazione
 
 1. [x] Questo ADR — review in `.github`
-2. [ ] `templates.yml` → drift-check (actionlint + verifica consumer dei
-       reusable + disallineamento versioni action)
+2. [x] `templates.yml` → drift-check (`scripts/drift_check.py`: ERROR su copie
+       inline dei reusable, WARN su setup-python inline e versioni action
+       fuori allowlist) — componenti condivisi allineati a canonical v7
 3. [ ] Migrare `lab-connectors` su `python-setup` + `test-audit-reusable`
 4. [ ] Estrarre `ci-python-reusable` e migrare i CI Python (toolkit,
        lab-connectors, source-observatory, agent-context-builder,
