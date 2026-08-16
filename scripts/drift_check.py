@@ -18,7 +18,8 @@ Casi verificati per ogni repo in scope:
   D. i workflow che eseguono pytest inline dovrebbero usare la composite
      action `dataciviclab/.github/actions/python-ci`.
   E. i repo pipeline usano `gcs-auth` per l'auth GCS (non gcloud inline).
-  F. i repo pipeline usano `registry-update-pr-reusable` per registry→draft PR.
+  F. i repo pipeline usano `registry-update-pr` (composite action, nello
+     stesso job del run: il registry deriva le entry dai parquet locali).
   G. i repo pipeline usano `dataset-config-check-reusable` per il loop preflight.
 
 Uso (locale):
@@ -85,7 +86,7 @@ CANONICAL = {
 REUSABLE_TEST_AUDIT = "test-audit-reusable.yml"
 ORG_ACTION_PYTHON_SETUP = "dataciviclab/.github/actions/python-setup"
 ORG_ACTION_GCS_AUTH = "dataciviclab/.github/actions/gcs-auth"
-REUSABLE_REGISTRY_PR = "registry-update-pr-reusable"
+ORG_ACTION_REGISTRY_PR = "dataciviclab/.github/actions/registry-update-pr"
 REUSABLE_CONFIG_CHECK = "dataset-config-check-reusable"
 
 USES_RE = re.compile(r"^\s*uses:\s*([^\s#@]+)@([^\s#]+)", re.M)
@@ -205,10 +206,10 @@ def check_pipeline_components(
                 f"{repo}: {name}: auth GCS inline — usa "
                 f"dataciviclab/.github/actions/gcs-auth"
             )
-        if re.search(r"registry build", text) and REUSABLE_REGISTRY_PR not in text:
+        if re.search(r"registry build", text) and ORG_ACTION_REGISTRY_PR not in text:
             report.warnings.append(
-                f"{repo}: {name}: registry→draft PR inline — usa il reusable "
-                f"dataciviclab/.github/.github/workflows/{REUSABLE_REGISTRY_PR}.yml"
+                f"{repo}: {name}: registry→draft PR inline — usa la composite "
+                f"action dataciviclab/.github/actions/registry-update-pr"
             )
         if re.search(r"toolkit run preflight", text) and \
                 REUSABLE_CONFIG_CHECK not in text:

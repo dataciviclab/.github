@@ -81,8 +81,8 @@ nel repo come input/condizioni, non come codice duplicato.
 | `python-setup` | composite action | setup Python (già adottato, estendere a lab-connectors, lab-dashboard) |
 | `python-ci` | composite action | CI Python (ruff+mypy+pytest) |
 | `gcs-auth` | composite action | blocco auth GCS JSON/base64 |
+| `registry-update-pr` | composite action | blocco registry→diff→draft PR (nello stesso job del run: il registry deriva le entry dai parquet locali) |
 | `dataset-config-check-reusable` | reusable workflow | blocchi preflight dei dataset |
-| `registry-update-pr-reusable` | reusable workflow | blocco registry→diff→draft PR |
 | `test-audit-reusable` | reusable workflow | già esistente; completare migrazione lab-connectors |
 
 **Nota su `python-ci` (composite action, non reusable workflow):** i CI Python
@@ -144,9 +144,9 @@ e `manifest-smoke-weekly` (catalog manifest GCS).
 4. [x] Estrarre `python-ci` (composite action ruff+mypy+pytest) e migrare i
        CI Python (toolkit, lab-connectors, source-observatory,
        agent-context-builder, lab-dashboard)
-5. [~] Componenti pipeline consegnati (`gcs-auth` composite, 
-       `registry-update-pr-reusable`, `dataset-config-check-reusable`),
-       drift-check esteso (E/F/G) — in corso migrazione repo per repo
+5. [~] Componenti pipeline consegnati (`gcs-auth`, `registry-update-pr`
+       composite action, `dataset-config-check-reusable`), drift-check
+       esteso (E/F/G) — in corso migrazione repo per repo
        (eurostat, open-siope, open-conto-annuale, dcl-bologna, open-politica,
        rna-aiuti-stato, senato-akn, dataset-incubator)
 6. [ ] Disambiguare `smoke-weekly`
