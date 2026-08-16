@@ -62,12 +62,12 @@ REPOS = [
     "senato-akn",
     "rna-aiuti-stato",
     "costituzione-italiana",
-    "data-advocacy",
     "partecipate-monitor",
     "project-template",
 ]
 
 # Consapevolmente fuori scope:
+#   - data-advocacy (privato: il GITHUB_TOKEN della CI non può leggerlo)
 #   - dataciviclab (hub: notebook validation, non CI Python)
 #   - openbdap-saldi-storico-stato (solo seed-issues, nessuna pipeline)
 #   - lab-ops, opere-pubbliche-intelligence, terzo-settore-intelligence,
@@ -250,6 +250,9 @@ def main() -> int:
             if exc.code in (403, 429):
                 print(f"[skip] {repo}: rate limit ({exc.code}) — riesegui con token")
                 break
+            if exc.code == 404:
+                print(f"[skip] {repo}: non leggibile (404) — privato o rinominato")
+                continue
             raise
         if not workflows:
             continue
