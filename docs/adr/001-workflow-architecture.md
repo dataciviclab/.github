@@ -1,6 +1,6 @@
 # ADR-001: Architettura dei workflow CI/pipeline del Lab
 
-**Status:** proposed (2026-08-16)
+**Status:** accepted (2026-08-16) — approvato con PR #26; passi 1-4 implementati
 
 ## Contesto
 
