@@ -1,0 +1,91 @@
+name: Registry Update PR (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      prefix:
+        description: Prefix per `toolkit registry build --prefix <prefix>`.
+        required: false
+        type: string
+        default: ""
+      flat:
+        description: Aggiunge `--flat` al registry build.
+        required: false
+        type: boolean
+        default: false
+      registry-dir:
+        description: Directory registry controllata nel diff (git status).
+        required: false
+        type: string
+        default: "registry"
+      toolkit-install:
+        description: Comando pip per installare il toolkit.
+        required: false
+        type: string
+        default: "pip install git+https://github.com/dataciviclab/toolkit.git"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-registry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install toolkit
+        run: ${{ inputs.toolkit-install }}
+
+      - name: Build registry
+        run: |
+          CMD="toolkit registry build"
+          if [ -n "${{ inputs.prefix }}" ]; then CMD="$CMD --prefix ${{ inputs.prefix }}"; fi
+          if [ "${{ inputs.flat }}" = "true" ]; then CMD="$CMD --flat"; fi
+          $CMD --write
+
+      - name: Check registry diff
+        id: diff
+        run: |
+          # registry/ è untracked su main (generato dal builder) —
+          # git diff ignora gli untracked, quindi usiamo git status.
+          if git status --porcelain -- ${{ inputs.registry-dir }} | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create draft registry PR
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number || 'schedule' }}
+        run: |
+          BRANCH="post-merge-registry/${PR_NUMBER}-registry"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add ${{ inputs.registry-dir }}
+          git commit -m "chore(post-merge): aggiorna registry ($PR_NUMBER)" || exit 0
+          git push --force-with-lease -u origin "$BRANCH"
+          EXISTING_PR=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING_PR" ]; then
+            gh pr edit "$EXISTING_PR" \
+              --title "chore(post-merge): aggiorna registry ($PR_NUMBER)" \
+              --body "Registry artifacts updated after pipeline run." \
+              --add-label post-merge
+          else
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "chore(post-merge): aggiorna registry ($PR_NUMBER)" \
+              --body "Registry artifacts updated after pipeline run." \
+              --label post-merge \
+              --draft
+          fi
