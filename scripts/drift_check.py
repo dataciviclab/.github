@@ -40,7 +40,7 @@ from dataclasses import dataclass, field
 API = "https://api.github.com"
 RAW_ACCEPT = "application/vnd.github.raw"
 
-# Repo in scope per il drift-check: core pipeline + repo dataset.
+# Repo in scope per il drift-check: core pipeline + repo dataset + CI Python.
 # Aggiungere un repo quando adotta il modello del layer condiviso (ADR-001).
 REPOS = [
     "toolkit",
@@ -55,7 +55,21 @@ REPOS = [
     "open-conto-annuale",
     "dcl-bologna",
     "italia-corpus",
+    "open-politica",
+    "senato-akn",
+    "rna-aiuti-stato",
+    "costituzione-italiana",
+    "data-advocacy",
+    "partecipate-monitor",
+    "project-template",
 ]
+
+# Consapevolmente fuori scope:
+#   - dataciviclab (hub: notebook validation, non CI Python)
+#   - openbdap-saldi-storico-stato (solo seed-issues, nessuna pipeline)
+#   - lab-ops, opere-pubbliche-intelligence, terzo-settore-intelligence,
+#     progetto-pilota (nessun workflow)
+#   - .github (repo del check stesso)
 
 # Versioni canoniche delle action di piattaforma (target da standardizzare).
 # I componenti condivisi in questo repo devono allinearsi qui (ADR-001 §5).
