@@ -15,6 +15,8 @@ Casi verificati per ogni repo in scope:
      `dataciviclab/.github/actions/python-setup`.
   C. le versioni di `actions/checkout`, `actions/setup-python` e
      `actions/upload-artifact` devono appartenere all'allowlist canonica.
+  D. i workflow che eseguono pytest inline dovrebbero usare la composite
+     action `dataciviclab/.github/actions/python-ci`.
 
 Uso (locale):
   python scripts/drift_check.py [--token $GITHUB_TOKEN]
@@ -143,6 +145,21 @@ def check_inline_setup_python(
             )
 
 
+def check_python_ci(repo: str, workflows: dict[str, str], report: Report) -> None:
+    for name, text in workflows.items():
+        if "dataciviclab/.github/actions/python-ci" in text:
+            continue  # usa già la composite action
+        # Solo workflow che sembrano un CI Python (lint + test insieme):
+        # smoke/probe/preflight che eseguono pytest da soli sono fuori scope.
+        has_lint = bool(re.search(r"ruff\s+check|ruff-action", text))
+        has_test = bool(re.search(r"\bpytest\b", text))
+        if has_lint and has_test:
+            report.warnings.append(
+                f"{repo}: {name}: lint/test inline — usa l'action org "
+                f"dataciviclab/.github/actions/python-ci"
+            )
+
+
 def check_action_versions(
     repo: str, workflows: dict[str, str], report: Report
 ) -> None:
@@ -195,6 +212,7 @@ def main() -> int:
         check_test_audit(repo, workflows, report)
         check_inline_setup_python(repo, workflows, report)
         check_action_versions(repo, workflows, report)
+        check_python_ci(repo, workflows, report)
 
     lines = render(report)
     print("\n".join(lines))

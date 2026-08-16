@@ -79,11 +79,18 @@ nel repo come input/condizioni, non come codice duplicato.
 | Componente | Tipo | Sostituisce |
 |---|---|---|
 | `python-setup` | composite action | setup Python (già adottato, estendere a lab-connectors, lab-dashboard) |
+| `python-ci` | composite action | CI Python (ruff+mypy+pytest) |
 | `gcs-auth` | composite action | blocco auth GCS JSON/base64 |
-| `ci-python-reusable` | reusable workflow | CI Python (ruff+mypy+pytest) |
 | `dataset-config-check-reusable` | reusable workflow | blocchi preflight dei dataset |
 | `registry-update-pr-reusable` | reusable workflow | blocco registry→diff→draft PR |
 | `test-audit-reusable` | reusable workflow | già esistente; completare migrazione lab-connectors |
+
+**Nota su `python-ci` (composite action, non reusable workflow):** i CI Python
+dei repo differiscono per build job, upload coverage, validazioni extra e
+soglie; un job reusable rigido costringerebbe a tagli o a troppi input.
+La composite action rende uguali solo i passi comuni (lint/type/test) e lascia
+a ogni repo il proprio scheletro con step extra dopo (stesso pattern di
+`python-setup`).
 
 ### 5. Versioni e pinning
 
@@ -134,9 +141,9 @@ e `manifest-smoke-weekly` (catalog manifest GCS).
        inline dei reusable, WARN su setup-python inline e versioni action
        fuori allowlist) — componenti condivisi allineati a canonical v7
 3. [ ] Migrare `lab-connectors` su `python-setup` + `test-audit-reusable`
-4. [ ] Estrarre `ci-python-reusable` e migrare i CI Python (toolkit,
-       lab-connectors, source-observatory, agent-context-builder,
-       lab-dashboard)
+4. [~] Estrarre `python-ci` (composite action ruff+mypy+pytest) e migrare i
+       CI Python (toolkit, lab-connectors, source-observatory,
+       agent-context-builder, lab-dashboard)
 5. [ ] Estrarre `dataset-config-check-reusable`, `gcs-auth`,
        `registry-update-pr-reusable` e migrare i repo dataset (eurostat,
        open-siope, open-conto-annuale, dcl-bologna)
