@@ -48,8 +48,9 @@ inputs:
     default: ""
   cov_report:
     description: >
-      Report coverage (spazio-separati, es. "term-missing --cov-report=xml").
-      Usato solo se cov_module è valorizzato.
+      Nomi report coverage separati da spazio (es. "term-missing xml").
+      Ogni nome diventa `--cov-report=<nome>`. Usato solo se cov_module
+      è valorizzato.
     required: false
     default: "term"
   cov_threshold:
