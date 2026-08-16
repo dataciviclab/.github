@@ -11,11 +11,13 @@ description: |
       with:
         prefix: "eurostat"
         flat: "true"
-        toolkit-install: "pip install git+https://github.com/dataciviclab/toolkit.git@v1.50.0"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  Il job chiamante deve avere `permissions: contents: write, pull-requests: write`.
+  NON installa il toolkit: usa quello già presente nel job (installato da
+  python-setup) — così il registry è derivato con la STESSA versione del
+  toolkit che ha prodotto i parquet in out/. Il job chiamante deve avere
+  `permissions: contents: write, pull-requests: write`.
 
 inputs:
   prefix:
@@ -30,21 +32,18 @@ inputs:
     description: Directory registry controllata nel diff (git status).
     required: false
     default: "registry"
-  toolkit-install:
-    description: Comando pip per installare il toolkit.
-    required: false
-    default: "pip install git+https://github.com/dataciviclab/toolkit.git"
 
 runs:
   using: "composite"
   steps:
-    - name: Install toolkit
-      shell: bash
-      run: ${{ inputs.toolkit-install }}
-
     - name: Build registry
       shell: bash
       run: |
+        command -v toolkit >/dev/null 2>&1 || {
+          echo "::error::toolkit non trovato — registry-update-pr deve girare "
+          echo "in un job dove python-setup ha già installato il toolkit"
+          exit 1
+        }
         CMD="toolkit registry build"
         if [ -n "${{ inputs.prefix }}" ]; then CMD="$CMD --prefix ${{ inputs.prefix }}"; fi
         if [ "${{ inputs.flat }}" = "true" ]; then CMD="$CMD --flat"; fi
