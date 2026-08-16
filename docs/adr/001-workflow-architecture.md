@@ -141,7 +141,7 @@ e `manifest-smoke-weekly` (catalog manifest GCS).
        inline dei reusable, WARN su setup-python inline e versioni action
        fuori allowlist) — componenti condivisi allineati a canonical v7
 3. [ ] Migrare `lab-connectors` su `python-setup` + `test-audit-reusable`
-4. [~] Estrarre `python-ci` (composite action ruff+mypy+pytest) e migrare i
+4. [x] Estrarre `python-ci` (composite action ruff+mypy+pytest) e migrare i
        CI Python (toolkit, lab-connectors, source-observatory,
        agent-context-builder, lab-dashboard)
 5. [ ] Estrarre `dataset-config-check-reusable`, `gcs-auth`,
