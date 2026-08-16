@@ -138,6 +138,23 @@ doppia fonte); requirements.txt solo se non c'è pyproject. I repo con
 doppia fonte (requirements che duplicano gli extras pyproject) consolidano
 sul pyproject.
 
+**Regole di dichiarazione:**
+- **Le dipendenze transitive non si ripetono.** `toolkit` dichiara già
+  `lab-connectors[duckdb,mcp]` → chi installa toolkit ottiene lab-connectors.
+  Nei workflow non si installa esplicitamente ciò che arriva da una
+  dipendenza dichiarata.
+- **Ogni repo dichiara solo ciò che usa direttamente.** Il repo che usa il
+  CLI di toolkit lo dichiara come dipendenza (pyproject o requirements);
+  `lab-connectors` esplicito solo se importato direttamente senza passare da
+  toolkit.
+- **La versione vive nel pyproject/requirements del repo, non nel workflow.**
+  Il workflow installa il repo (`-e ".[extras]"` o `-r requirements.txt`) e
+  pip risolve tutto. Niente git-install espliciti né pin di versione nel YAML.
+- **Extra per contesto**: runtime/engine nell'extra del contesto di esecuzione
+  (es. `pipeline = ["toolkit @ git+...@v1.50.0"]`), tooling dev in `dev`.
+  Il job di test installa solo ciò che serve ai test (`-e ".[dev]"`), non il
+  motore.
+
 ## Conseguenze
 
 **Positive:**
