@@ -1,0 +1,95 @@
+name: 'Python CI (org-level)'
+description: |
+  Lint (ruff) + type check (mypy) + test (pytest) come step composabili,
+  con soglia coverage opzionale. Da usare DOPO python-setup in un job
+  del repo consumer (il checkout deve essere fatto PRIMA).
+
+  Ogni repo tiene il proprio scheletro di job e aggiunge step extra dopo
+  (build, upload coverage, validazioni specifiche): la composite action
+  rende uguali solo i passi comuni, non il job intero.
+
+  Usage:
+    - uses: actions/checkout@v7
+    - uses: dataciviclab/.github/actions/python-setup@main
+      with:
+        extra-packages: -e ".[dev]"
+    - uses: dataciviclab/.github/actions/python-ci@main
+      with:
+        lint_paths: "src tests"
+        mypy_paths: "src"
+        test_dir: "tests"
+        pytest_args: "-q -m \"not smoke\""
+        cov_module: "src"
+        cov_report: "term-missing xml"
+        cov_threshold: "80"
+
+inputs:
+  lint_paths:
+    description: Path per `ruff check`.
+    required: true
+  mypy_paths:
+    description: Path per `mypy`; vuoto = step saltato.
+    required: false
+    default: ""
+  test_dir:
+    description: Directory dei test per pytest.
+    required: false
+    default: "tests"
+  pytest_args:
+    description: >
+      Argomenti pytest extra, passati tal quali alla shell
+      (es. "-q -m \"not smoke\"").
+    required: false
+    default: "-q"
+  cov_module:
+    description: >
+      Modulo per `--cov`; vuoto = nessuna misura coverage.
+    required: false
+    default: ""
+  cov_report:
+    description: >
+      Nomi report coverage separati da spazio (es. "term-missing xml").
+      Ogni nome diventa `--cov-report=<nome>`. Usato solo se cov_module
+      è valorizzato.
+    required: false
+    default: "term"
+  cov_threshold:
+    description: >
+      Soglia per `--cov-fail-under`; vuoto = nessun gate. Applicata anche
+      senza cov_module (per repo che misurano coverage dal config, es.
+      source-observatory con --cov-fail-under=60).
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Lint (ruff)
+      shell: bash
+      run: python -m ruff check ${{ inputs.lint_paths }}
+
+    - name: Type check (mypy)
+      if: inputs.mypy_paths != ''
+      shell: bash
+      run: python -m mypy ${{ inputs.mypy_paths }}
+
+    - name: Test (pytest)
+      shell: bash
+      env:
+        TEST_DIR: ${{ inputs.test_dir }}
+        PYTEST_ARGS: ${{ inputs.pytest_args }}
+        COV_MODULE: ${{ inputs.cov_module }}
+        COV_REPORT: ${{ inputs.cov_report }}
+        COV_THRESHOLD: ${{ inputs.cov_threshold }}
+      run: |
+        echo "::group::pytest"
+        cmd="python -m pytest $TEST_DIR $PYTEST_ARGS"
+        if [ -n "$COV_MODULE" ]; then
+          cmd="$cmd --cov=$COV_MODULE"
+          for r in $COV_REPORT; do cmd="$cmd --cov-report=$r"; done
+        fi
+        if [ -n "$COV_THRESHOLD" ]; then
+          cmd="$cmd --cov-fail-under=$COV_THRESHOLD"
+        fi
+        eval "$cmd"
+        echo "::endgroup::"
