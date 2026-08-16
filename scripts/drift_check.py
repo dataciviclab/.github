@@ -17,6 +17,10 @@ Casi verificati per ogni repo in scope:
      `actions/upload-artifact` devono appartenere all'allowlist canonica.
   D. i workflow che eseguono pytest inline dovrebbero usare la composite
      action `dataciviclab/.github/actions/python-ci`.
+  E. i repo pipeline usano `gcs-auth` per l'auth GCS (non gcloud inline).
+  F. i repo pipeline usano `registry-update-pr` (composite action, nello
+     stesso job del run: il registry deriva le entry dai parquet locali).
+  G. i repo pipeline usano `dataset-config-check-reusable` per il loop preflight.
 
 Uso (locale):
   python scripts/drift_check.py [--token $GITHUB_TOKEN]
@@ -59,12 +63,12 @@ REPOS = [
     "senato-akn",
     "rna-aiuti-stato",
     "costituzione-italiana",
-    "data-advocacy",
     "partecipate-monitor",
     "project-template",
 ]
 
 # Consapevolmente fuori scope:
+#   - data-advocacy (privato: il GITHUB_TOKEN della CI non può leggerlo)
 #   - dataciviclab (hub: notebook validation, non CI Python)
 #   - openbdap-saldi-storico-stato (solo seed-issues, nessuna pipeline)
 #   - lab-ops, opere-pubbliche-intelligence, terzo-settore-intelligence,
@@ -81,6 +85,9 @@ CANONICAL = {
 
 REUSABLE_TEST_AUDIT = "test-audit-reusable.yml"
 ORG_ACTION_PYTHON_SETUP = "dataciviclab/.github/actions/python-setup"
+ORG_ACTION_GCS_AUTH = "dataciviclab/.github/actions/gcs-auth"
+ORG_ACTION_REGISTRY_PR = "dataciviclab/.github/actions/registry-update-pr"
+REUSABLE_CONFIG_CHECK = "dataset-config-check-reusable"
 
 USES_RE = re.compile(r"^\s*uses:\s*([^\s#@]+)@([^\s#]+)", re.M)
 
@@ -188,6 +195,30 @@ def check_action_versions(
                 )
 
 
+def check_pipeline_components(
+    repo: str, workflows: dict[str, str], report: Report
+) -> None:
+    """E/F/G: i repo pipeline usano i componenti condivisi (ADR-001)."""
+    for name, text in workflows.items():
+        if re.search(r"gcloud auth activate-service-account", text) and \
+                ORG_ACTION_GCS_AUTH not in text:
+            report.warnings.append(
+                f"{repo}: {name}: auth GCS inline — usa "
+                f"dataciviclab/.github/actions/gcs-auth"
+            )
+        if re.search(r"registry build", text) and ORG_ACTION_REGISTRY_PR not in text:
+            report.warnings.append(
+                f"{repo}: {name}: registry→draft PR inline — usa la composite "
+                f"action dataciviclab/.github/actions/registry-update-pr"
+            )
+        if re.search(r"toolkit run preflight", text) and \
+                REUSABLE_CONFIG_CHECK not in text:
+            report.warnings.append(
+                f"{repo}: {name}: loop preflight inline — usa il reusable "
+                f"dataciviclab/.github/.github/workflows/{REUSABLE_CONFIG_CHECK}.yml"
+            )
+
+
 def render(report: Report) -> list[str]:
     lines = ["Drift-check: repo org vs componenti condivisi (.github)", ""]
     if not report.errors and not report.warnings:
@@ -220,6 +251,9 @@ def main() -> int:
             if exc.code in (403, 429):
                 print(f"[skip] {repo}: rate limit ({exc.code}) — riesegui con token")
                 break
+            if exc.code == 404:
+                print(f"[skip] {repo}: non leggibile (404) — privato o rinominato")
+                continue
             raise
         if not workflows:
             continue
@@ -227,6 +261,7 @@ def main() -> int:
         check_inline_setup_python(repo, workflows, report)
         check_action_versions(repo, workflows, report)
         check_python_ci(repo, workflows, report)
+        check_pipeline_components(repo, workflows, report)
 
     lines = render(report)
     print("\n".join(lines))

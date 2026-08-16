@@ -1,0 +1,54 @@
+name: 'GCS Auth (org-level)'
+description: |
+  Auth GCP via service account key (JSON raw o base64) da usare PRIMA del
+  sync GCS in un job pipeline.
+
+  Il caller passa il secret come env `GCP_SA_KEY` sullo step:
+    - uses: dataciviclab/.github/actions/gcs-auth@main
+      env:
+        GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+    - name: Sync to GCS
+      if: steps.auth.outputs.ready == 'true'
+      run: ...
+
+  Output `ready`:
+    - `true`  — auth riuscita
+    - `false` — secret non configurato (skip sync, non fallisce)
+
+  I secret hanno nomi diversi per repo (`GCP_SA_KEY`, `GCP_SA_KEY_EUROSTAT`,
+  ...): il mapping resta nel workflow chiamante, qui non importa il nome.
+
+outputs:
+  ready:
+    description: true se l'auth è riuscita, false se il secret manca
+    value: ${{ steps.auth.outputs.ready }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Authenticate to Google Cloud
+      id: auth
+      shell: bash
+      env:
+        GCP_SA_KEY: ${{ env.GCP_SA_KEY }}
+      run: |
+        if [ -z "$GCP_SA_KEY" ]; then
+          echo "::notice::GCP_SA_KEY non configurato — skip GCS sync"
+          echo "ready=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        # Supporta sia JSON raw che base64
+        if echo "$GCP_SA_KEY" | python3 -c "import json,sys; json.load(sys.stdin)" 2>/dev/null; then
+          printf '%s\n' "$GCP_SA_KEY" > /tmp/gcp-key.json
+        else
+          printf '%s\n' "$GCP_SA_KEY" | base64 -d > /tmp/gcp-key.json 2>/dev/null
+        fi
+        if [ ! -s /tmp/gcp-key.json ]; then
+          echo "::error::GCP_SA_KEY non è un JSON valido né base64"
+          exit 1
+        fi
+        if ! gcloud auth activate-service-account --key-file=/tmp/gcp-key.json; then
+          echo "::error::Auth GCP fallita"
+          exit 1
+        fi
+        echo "ready=true" >> "$GITHUB_OUTPUT"
