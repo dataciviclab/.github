@@ -114,6 +114,30 @@ I consumer restano su `@main` finché il `.github` ha review; tag semver
 Disambiguare `smoke-weekly` per scopo: `probe-weekly` (raggiungibilità fonti)
 e `manifest-smoke-weekly` (catalog manifest GCS).
 
+### 8. Convenzione dipendenze: pyproject per i pacchetti, requirements per i dataset puri
+
+**`pyproject.toml` è l'unica fonte di verità per i repo-pacchetto Python**
+(toolkit, lab-connectors, source-observatory, dataset-incubator,
+agent-context-builder, eurostat, rna-aiuti-stato, costituzione-italiana,
+partecipate-monitor, lab-dashboard, senato-akn):
+
+- `project.dependencies` = dipendenze runtime
+- `[project.optional-dependencies]` = extras per contesto (`dev` per
+  CI/lint/test, `pipeline`, `gcs`, `mcp`, `duckdb`, ...)
+- la CI installa `pip install -e ".[dev]"` (o `-e ".[dev,pipeline]"`)
+- **nessun `requirements.txt` come fonte primaria** (al massimo export di pin
+  per deploy, mai duplicazione delle dichiarazioni del pyproject)
+
+**I repo dataset puri** (open-siope, open-conto-annuale, dcl-bologna,
+open-politica, project-template) **non sono pacchetti**: un `requirements.txt`
+minimo (toolkit, lab-connectors, duckdb) è la fonte unica.
+
+**`python-setup` è pyproject-first**: se c'è pyproject installa
+`-e ".[extras]"` (via input) e non auto-installa requirements.txt (evita la
+doppia fonte); requirements.txt solo se non c'è pyproject. I repo con
+doppia fonte (requirements che duplicano gli extras pyproject) consolidano
+sul pyproject.
+
 ## Conseguenze
 
 **Positive:**
@@ -151,3 +175,6 @@ e `manifest-smoke-weekly` (catalog manifest GCS).
        rna-aiuti-stato, senato-akn, dataset-incubator)
 6. [ ] Disambiguare `smoke-weekly`
 7. [ ] Allineare `project-template` al modello
+8. [ ] Consolidare le dipendenze (convenzione §8): i repo a doppia fonte
+       (source-observatory, dataset-incubator, senato-akn, lab-dashboard)
+       consolidano sul pyproject, poi `python-setup` v2 pyproject-first
