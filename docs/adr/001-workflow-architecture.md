@@ -144,8 +144,10 @@ e `manifest-smoke-weekly` (catalog manifest GCS).
 4. [x] Estrarre `python-ci` (composite action ruff+mypy+pytest) e migrare i
        CI Python (toolkit, lab-connectors, source-observatory,
        agent-context-builder, lab-dashboard)
-5. [ ] Estrarre `dataset-config-check-reusable`, `gcs-auth`,
-       `registry-update-pr-reusable` e migrare i repo dataset (eurostat,
-       open-siope, open-conto-annuale, dcl-bologna)
+5. [~] Componenti pipeline consegnati (`gcs-auth` composite, 
+       `registry-update-pr-reusable`, `dataset-config-check-reusable`),
+       drift-check esteso (E/F/G) — in corso migrazione repo per repo
+       (eurostat, open-siope, open-conto-annuale, dcl-bologna, open-politica,
+       rna-aiuti-stato, senato-akn, dataset-incubator)
 6. [ ] Disambiguare `smoke-weekly`
 7. [ ] Allineare `project-template` al modello
