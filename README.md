@@ -10,6 +10,7 @@ Non è l'hub pubblico del Lab. È il posto in cui teniamo ordine su GitHub.
 - community health files
 - policy comuni di collaborazione
 - template per issue, pull request e discussions
+- decisioni architetturali sul layer GitHub ([`docs/adr`](docs/adr/))
 - profilo pubblico dell'organizzazione
 - istruzioni minime su supporto, sicurezza e canali
 
