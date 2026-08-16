@@ -6,7 +6,7 @@ description: |
   Il caller passa il secret come env `GCP_SA_KEY` sullo step:
     - uses: dataciviclab/.github/actions/gcs-auth@main
       env:
-        GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        GCP_SA_KEY: secrets.<NOME_SECRET_DEL_REPO>   # es. secrets.GCP_SA_KEY_EUROSTAT
     - name: Sync to GCS
       if: steps.auth.outputs.ready == 'true'
       run: ...

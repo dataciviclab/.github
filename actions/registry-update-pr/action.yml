@@ -12,7 +12,7 @@ description: |
         prefix: "eurostat"
         flat: "true"
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: secrets.GITHUB_TOKEN
 
   NON installa il toolkit: usa quello già presente nel job (installato da
   python-setup) — così il registry è derivato con la STESSA versione del
