@@ -50,6 +50,9 @@ jobs:
           GLOBS: ${{ inputs.globs }}
           YEARS: ${{ inputs.years }}
           EXCLUDE: ${{ inputs.exclude }}
+          # Abilita i source `type: script` (es. open-politica, elezioni-*):
+          # il preflight valida anche i config che materializzano via script.
+          TOOLKIT_ALLOW_SCRIPT_SOURCE: "1"
         run: |
           set -e
           for glob in $GLOBS; do
