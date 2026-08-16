@@ -20,7 +20,7 @@ description: |
         test_dir: "tests"
         pytest_args: "-q -m \"not smoke\""
         cov_module: "src"
-        cov_report: "term-missing --cov-report=xml"
+        cov_report: "term-missing xml"
         cov_threshold: "80"
 
 inputs:
@@ -55,8 +55,9 @@ inputs:
     default: "term"
   cov_threshold:
     description: >
-      Soglia per `--cov-fail-under`; vuoto = nessun gate. Usato solo se
-      cov_module è valorizzato.
+      Soglia per `--cov-fail-under`; vuoto = nessun gate. Applicata anche
+      senza cov_module (per repo che misurano coverage dal config, es.
+      source-observatory con --cov-fail-under=60).
     required: false
     default: ""
 
