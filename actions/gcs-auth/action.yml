@@ -1,26 +1,41 @@
 name: 'GCS Auth (org-level)'
 description: |
-  Auth GCP via service account key (JSON raw o base64) da usare PRIMA del
-  sync GCS in un job pipeline.
+  Auth GCP per sync GCS — supporta Workload Identity Federation (WIF)
+  e Service Account key (legacy).
+
+  ## Pattern WIF (consigliato, zero chiavi statiche)
+
+  Il caller autentica PRIMA con google-github-actions/auth, poi chiama questa
+  action che rileva l'auth esistente:
+
+    - uses: google-github-actions/auth@v3
+      id: gcp-auth
+      with:
+        workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+    - uses: dataciviclab/.github/actions/gcs-auth@main
+    - name: Sync to GCS
+      if: steps.gcs.outputs.ready == 'true'
+      run: ...
+
+  ## Pattern SA key (legacy, in fase di eliminazione)
 
   Il caller passa il secret come env `GCP_SA_KEY` sullo step:
+
     - uses: dataciviclab/.github/actions/gcs-auth@main
       env:
-        GCP_SA_KEY: secrets.<NOME_SECRET_DEL_REPO>   # es. secrets.GCP_SA_KEY_EUROSTAT
+        GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}   # es. secrets.GCP_SA_KEY_EUROSTAT
     - name: Sync to GCS
-      if: steps.auth.outputs.ready == 'true'
+      if: steps.gcs.outputs.ready == 'true'
       run: ...
 
   Output `ready`:
-    - `true`  — auth riuscita
-    - `false` — secret non configurato (skip sync, non fallisce)
-
-  I secret hanno nomi diversi per repo (`GCP_SA_KEY`, `GCP_SA_KEY_EUROSTAT`,
-  ...): il mapping resta nel workflow chiamante, qui non importa il nome.
+    - `true`  — auth riuscita (WIF o SA key)
+    - `false` — nessun metodo configurato (skip sync, non fallisce)
 
 outputs:
   ready:
-    description: true se l'auth è riuscita, false se il secret manca
+    description: true se l'auth è riuscita, false se nessun metodo configurato
     value: ${{ steps.auth.outputs.ready }}
 
 runs:
@@ -32,11 +47,23 @@ runs:
       env:
         GCP_SA_KEY: ${{ env.GCP_SA_KEY }}
       run: |
+        # ── Pattern 1: WIF (se google-github-actions/auth ha già autenticato) ──
+        # google-github-actions/auth imposta GOOGLE_APPLICATION_CREDENTIALS
+        # e ADC. Se il file esiste, gcloud è già autenticato.
+        if [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ] && [ -f "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+          echo "::notice::GCS Auth: WIF attivo (GOOGLE_APPLICATION_CREDENTIALS trovato)"
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        # ── Pattern 2: SA key legacy ──
         if [ -z "$GCP_SA_KEY" ]; then
-          echo "::notice::GCP_SA_KEY non configurato — skip GCS sync"
+          echo "::notice::Nessun metodo GCS auth configurato (né WIF né SA key) — skip GCS sync"
           echo "ready=false" >> "$GITHUB_OUTPUT"
           exit 0
         fi
+
+        echo "::notice::GCS Auth: usa SA key legacy (considerea migrazione a WIF)"
         # Supporta sia JSON raw che base64
         if echo "$GCP_SA_KEY" | python3 -c "import json,sys; json.load(sys.stdin)" 2>/dev/null; then
           printf '%s\n' "$GCP_SA_KEY" > /tmp/gcp-key.json
