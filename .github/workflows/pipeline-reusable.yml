@@ -36,12 +36,12 @@ on:
         description: "Extra packages per pip install"
         default: ""
         type: string
-      detect-command:
-        description: "Comando per detect dataset (default: esegui tutto)"
-        default: ""
-        type: string
       verify-command:
         description: "Comando verify post-run (default: nessuno)"
+        default: ""
+        type: string
+      extra-env:
+        description: "Env vars extra (KEY=VALUE per riga, es. FOO=bar\nBAZ=1)"
         default: ""
         type: string
     secrets:
@@ -69,6 +69,11 @@ jobs:
       - uses: dataciviclab/.github/actions/python-setup@main
         with:
           extra-packages: ${{ inputs.python-extra-packages }}
+
+      # ── Extra env vars (opzionale) ──────────────────────────────────
+      - name: Set extra env vars
+        if: inputs.extra-env != ''
+        run: echo "${{ inputs.extra-env }}" >> "$GITHUB_ENV"
 
       # ── Run datasets ────────────────────────────────────────────────
       - name: Run datasets
