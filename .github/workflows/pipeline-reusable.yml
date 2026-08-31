@@ -2,9 +2,10 @@
 #
 # Workflow unico post-merge + refresh. Gestisce:
 #   1. checkout + python-setup
-#   2. run (make target passato come input)
-#   3. GCS auth (WIF) + sync (clean + mart)
-#   4. registry → PR draft
+#   2. pre-run (opzionale: detect, codelists, bootstrap)
+#   3. run (make target passato come input)
+#   4. GCS auth (WIF) + sync (clean + mart)
+#   5. registry → PR draft
 #
 # Il repo chiama con i propri input:
 #   - run-command: comando da eseguire (es. "make run-all")
@@ -28,6 +29,10 @@ on:
         description: "flat (rsync intera dir out/) o per-dataset (per slug/year)"
         default: "flat"
         type: string
+      pre-run-command:
+        description: "Comando pre-run opzionale (es. detect, codelists, bootstrap)"
+        default: ""
+        type: string
       checkout-ref:
         description: "Ref da checkout (default: github.ref)"
         default: ""
@@ -41,7 +46,7 @@ on:
         default: ""
         type: string
       extra-env:
-        description: "Env vars extra (KEY=VALUE per riga, es. FOO=bar\nBAZ=1)"
+        description: "Env vars extra (KEY=VALUE per riga)"
         default: ""
         type: string
     secrets:
@@ -74,6 +79,11 @@ jobs:
       - name: Set extra env vars
         if: inputs.extra-env != ''
         run: echo "${{ inputs.extra-env }}" >> "$GITHUB_ENV"
+
+      # ── Pre-run (opzionale: detect, codelists, bootstrap) ───────────
+      - name: Pre-run
+        if: inputs.pre-run-command != ''
+        run: ${{ inputs.pre-run-command }}
 
       # ── Run datasets ────────────────────────────────────────────────
       - name: Run datasets
