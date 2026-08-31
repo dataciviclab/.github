@@ -1,0 +1,144 @@
+# Pipeline Reusable — DataCivicLab
+#
+# Workflow unico post-merge + refresh. Gestisce:
+#   1. checkout + python-setup
+#   2. pre-run (opzionale: detect, codelists, bootstrap)
+#   3. run (make target passato come input)
+#   4. GCS auth (WIF) + sync (clean + mart)
+#   5. registry → PR draft
+#
+# Il repo chiama con i propri input:
+#   - run-command: comando da eseguire (es. "make run-all")
+#   - repo-slug: prefisso GCS e registry
+#   - sync-pattern: "flat" (rsync intera dir) o "per-dataset" (per slug/year)
+
+name: Pipeline (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      repo-slug:
+        description: "Slug del repo (es. conto-annuale, siope)"
+        required: true
+        type: string
+      run-command:
+        description: "Comando da eseguire per i dataset (es. make run-all)"
+        required: true
+        type: string
+      sync-pattern:
+        description: "flat (rsync intera dir out/) o per-dataset (per slug/year)"
+        default: "flat"
+        type: string
+      pre-run-command:
+        description: "Comando pre-run opzionale (es. detect, codelists, bootstrap)"
+        default: ""
+        type: string
+      checkout-ref:
+        description: "Ref da checkout (default: github.ref)"
+        default: ""
+        type: string
+      python-extra-packages:
+        description: "Extra packages per pip install"
+        default: ""
+        type: string
+      verify-command:
+        description: "Comando verify post-run (default: nessuno)"
+        default: ""
+        type: string
+      extra-env:
+        description: "Env vars extra (KEY=VALUE per riga)"
+        default: ""
+        type: string
+    secrets:
+      GCP_SA_KEY:
+        required: false
+
+env:
+  GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+  GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.checkout-ref || github.ref }}
+          fetch-depth: 0
+
+      - uses: dataciviclab/.github/actions/python-setup@main
+        with:
+          extra-packages: ${{ inputs.python-extra-packages }}
+
+      # ── Extra env vars (opzionale) ──────────────────────────────────
+      - name: Set extra env vars
+        if: inputs.extra-env != ''
+        run: echo "${{ inputs.extra-env }}" >> "$GITHUB_ENV"
+
+      # ── Pre-run (opzionale: detect, codelists, bootstrap) ───────────
+      - name: Pre-run
+        if: inputs.pre-run-command != ''
+        run: ${{ inputs.pre-run-command }}
+
+      # ── Run datasets ────────────────────────────────────────────────
+      - name: Run datasets
+        run: ${{ inputs.run-command }}
+
+      # ── Verify (opzionale) ──────────────────────────────────────────
+      - name: Verify output
+        if: inputs.verify-command != ''
+        run: ${{ inputs.verify-command }}
+
+      # ── GCS auth + sync ─────────────────────────────────────────────
+      - name: GCP Auth (for GCS push)
+        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != ''
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != ''
+        uses: google-github-actions/setup-gcloud@v3
+
+      # Sync flat: rsync intera dir out/ al prefisso repo
+      - name: Sync to GCS (flat)
+        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'flat'
+        run: |
+          gsutil -m rsync -r out/data/mart/ gs://dataciviclab-mart/${{ inputs.repo-slug }}/
+          gsutil -m rsync -r out/data/clean/ gs://dataciviclab-clean/${{ inputs.repo-slug }}/
+          echo "✅ Synced to gs://dataciviclab-mart|clean/${{ inputs.repo-slug }}/"
+
+      # Sync per-dataset: per slug/year
+      - name: Sync to GCS (per-dataset)
+        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'per-dataset'
+        run: |
+          for slug_dir in out/data/clean/*/; do
+            [ -d "$slug_dir" ] || continue
+            slug=$(basename "$slug_dir")
+            year=$(ls "$slug_dir" 2>/dev/null | sort -rn | head -1)
+            [ -z "$year" ] && echo "⚠️  No clean output for $slug" && continue
+            gsutil -m rsync -r "${slug_dir}${year}/" "gs://dataciviclab-clean/${{ inputs.repo-slug }}/$slug/$year/"
+            echo "✅ $slug clean synced"
+          done
+          for slug_dir in out/data/mart/*/; do
+            [ -d "$slug_dir" ] || continue
+            slug=$(basename "$slug_dir")
+            year=$(ls "$slug_dir" 2>/dev/null | sort -rn | head -1)
+            [ -z "$year" ] && echo "⚠️  No mart output for $slug" && continue
+            gsutil -m rsync -r "${slug_dir}${year}/" "gs://dataciviclab-mart/${{ inputs.repo-slug }}/$slug/$year/"
+            echo "✅ $slug mart synced"
+          done
+
+      # ── Registry → draft PR ──────────────────────────────────────────
+      - name: Registry update PR
+        uses: dataciviclab/.github/actions/registry-update-pr@main
+        with:
+          prefix: ${{ inputs.repo-slug }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
