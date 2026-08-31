@@ -1,0 +1,96 @@
+name: Detect Changed Datasets
+description: |
+  Rileva i dataset cambiati in una PR. Restituisce la lista dei path
+  (dir con dataset.yml) e il conteggio.
+
+  Usage:
+    - uses: dataciviclab/.github/actions/detect-changed-datasets@main
+      id: detect
+      with:
+        paths: "datasets candidates compose support_datasets"
+
+  Output `dirs`: space-separated list (es. "datasets/foo candidates/bar")
+  Output `count`: numero di dataset trovati
+  Output `found`: "true" o "false"
+
+inputs:
+  paths:
+    description: "Path prefixes da cercare (space-separated, es. 'datasets candidates compose')"
+    required: true
+  exclude:
+    description: "Regex per escludere file (es. docs, output)"
+    default: "\\.(md|ipynb|png|jpg|jpeg|gif|svg)$|/(out|__pycache__)/"
+  slug-input:
+    description: "Slug specifico da processare (workflow_dispatch). Vuoto = detect da PR."
+    default: ""
+
+outputs:
+  dirs:
+    description: "Space-separated list di dir con dataset.yml"
+    value: ${{ steps.detect.outputs.dirs }}
+  count:
+    description: "Numero di dataset trovati"
+    value: ${{ steps.detect.outputs.count }}
+  found:
+    description: "true se ci sono dataset da processare"
+    value: ${{ steps.detect.outputs.found }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Detect changed datasets
+      id: detect
+      shell: bash
+      env:
+        PATHS: ${{ inputs.paths }}
+        EXCLUDE: ${{ inputs.exclude }}
+        SLUG_INPUT: ${{ inputs.slug-input }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        : > changed.txt
+
+        if [ -n "$SLUG_INPUT" ]; then
+          # Modalità manuale: cerca lo slug in tutti i path
+          for base in $PATHS; do
+            if [ -f "$base/$SLUG_INPUT/dataset.yml" ]; then
+              echo "$base/$SLUG_INPUT" >> changed.txt
+            fi
+          done
+        else
+          # Modalità PR: detect dai file cambiati
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          if [ -z "$PR_NUMBER" ]; then
+            echo "::warning::Nessuna PR number — skip detect"
+            echo "dirs=" >> "$GITHUB_OUTPUT"
+            echo "count=0" >> "$GITHUB_OUTPUT"
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Costruisci regex dai path prefixes
+          PATHS_REGEX=$(echo "$PATHS" | sed 's/ /|/g')
+
+          gh pr view "$PR_NUMBER" --json files --jq '.files[].path' | \
+            grep -E "^($PATHS_REGEX)/" | \
+            grep -vE "$EXCLUDE" | \
+            cut -d/ -f1-2 | sort -u > raw_dirs.txt
+
+          # Filtra solo dir con dataset.yml
+          while read -r d; do
+            [ -n "$d" ] && [ -f "$d/dataset.yml" ] && echo "$d" >> changed.txt
+          done < raw_dirs.txt
+        fi
+
+        if [ -s changed.txt ]; then
+          DIRS=$(cat changed.txt | tr '\n' ' ' | sed 's/ $//')
+          COUNT=$(wc -l < changed.txt | tr -d ' ')
+          echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+          echo "found=true" >> "$GITHUB_OUTPUT"
+          echo "✅ Trovati $COUNT dataset: $DIRS"
+        else
+          echo "dirs=" >> "$GITHUB_OUTPUT"
+          echo "count=0" >> "$GITHUB_OUTPUT"
+          echo "found=false" >> "$GITHUB_OUTPUT"
+          echo "⚠️ Nessun dataset trovato"
+        fi
