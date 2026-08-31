@@ -1,11 +1,7 @@
 name: Detect Changed Datasets
 description: |
-  Rileva i dataset cambiati in una PR. Restituisce la lista dei path
-  (dir con dataset.yml) e il conteggio.
-
-  Il caller deve passare GH_TOKEN come env var:
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  Rileva i dataset cambiati in una PR. Restituisce le dir con dataset.yml.
+  Il caller deve passare GH_TOKEN come env var (secrets.GITHUB_TOKEN).
 
 inputs:
   paths:
@@ -51,7 +47,7 @@ runs:
         else
           PR_NUMBER="${{ github.event.pull_request.number }}"
           if [ -z "$PR_NUMBER" ]; then
-            echo "::warning::Nessuna PR number — skip detect"
+            echo "::warning::Nessuna PR number - skip detect"
             echo "dirs=" >> "$GITHUB_OUTPUT"
             echo "count=0" >> "$GITHUB_OUTPUT"
             echo "found=false" >> "$GITHUB_OUTPUT"
@@ -76,10 +72,10 @@ runs:
           echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
           echo "count=$COUNT" >> "$GITHUB_OUTPUT"
           echo "found=true" >> "$GITHUB_OUTPUT"
-          echo "✅ Trovati $COUNT dataset: $DIRS"
+          echo "Trovati $COUNT dataset: $DIRS"
         else
           echo "dirs=" >> "$GITHUB_OUTPUT"
           echo "count=0" >> "$GITHUB_OUTPUT"
           echo "found=false" >> "$GITHUB_OUTPUT"
-          echo "⚠️ Nessun dataset trovato"
+          echo "Nessun dataset trovato"
         fi
