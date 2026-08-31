@@ -29,6 +29,14 @@ on:
         required: false
         type: string
         default: ""
+      configs:
+        description: >
+          Lista di path dataset.yml da validare (uno per riga, newline-separated).
+          Se fornita, controlla SOLO questi path (ignora globs).
+          Vuota = controlla tutti i dataset.yml nei globs (comportamento default).
+        required: false
+        type: string
+        default: ""
 
 jobs:
   validate-config:
@@ -50,30 +58,44 @@ jobs:
           GLOBS: ${{ inputs.globs }}
           YEARS: ${{ inputs.years }}
           EXCLUDE: ${{ inputs.exclude }}
+          CONFIGS: ${{ inputs.configs }}
           TOOLKIT_ALLOW_SCRIPT_SOURCE: "1"
         run: |
           ERRORS=0
-          for glob in $GLOBS; do
-            while IFS= read -r cfg; do
-              dir=$(basename "$(dirname "$cfg")")
-              if [ -n "$EXCLUDE" ] && echo "$dir" | grep -qE "$EXCLUDE"; then
-                echo "→ $cfg (skip: $dir)"
-                continue
-              fi
-              if [ "$YEARS" = "from-config" ]; then
-                Y=$(python3 -c "import yaml; print(','.join(str(x) for x in yaml.safe_load(open('$cfg'))['dataset']['years']))")
-              else
-                Y="$YEARS"
-              fi
-              echo "→ $cfg (years: $Y)"
-              if toolkit run preflight --config "$cfg" --years "$Y" > /dev/null 2>&1; then
-                echo "  ✅ OK"
-              else
-                echo "  ⚠️  FAILED (fonte irraggiungibile o config invalida)"
-                ERRORS=$((ERRORS + 1))
-              fi
-            done < <(find "$glob" -name dataset.yml | sort)
-          done
+          # Se configs è fornito, usa solo quelli; altrimenti find su globs
+          if [ -n "$CONFIGS" ]; then
+            echo "→ Modalità: configs specifici"
+            echo "$CONFIGS" > /tmp/configs.txt
+          else
+            echo "→ Modalità: tutti i dataset nei globs"
+            : > /tmp/configs.txt
+            for glob in $GLOBS; do
+              find "$glob" -name dataset.yml >> /tmp/configs.txt
+            done
+            sort -o /tmp/configs.txt /tmp/configs.txt
+          fi
+          TOTAL=$(wc -l < /tmp/configs.txt | tr -d ' ')
+          echo "→ $TOTAL config da validare"
+          while IFS= read -r cfg; do
+            [ -z "$cfg" ] && continue
+            dir=$(basename "$(dirname "$cfg")")
+            if [ -n "$EXCLUDE" ] && echo "$dir" | grep -qE "$EXCLUDE"; then
+              echo "→ $cfg (skip: $dir)"
+              continue
+            fi
+            if [ "$YEARS" = "from-config" ]; then
+              Y=$(python3 -c "import yaml; print(','.join(str(x) for x in yaml.safe_load(open('$cfg'))['dataset']['years']))")
+            else
+              Y="$YEARS"
+            fi
+            echo "→ $cfg (years: $Y)"
+            if toolkit run preflight --config "$cfg" --years "$Y" > /dev/null 2>&1; then
+              echo "  ✅ OK"
+            else
+              echo "  ⚠️  FAILED (fonte irraggiungibile o config invalida)"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done < /tmp/configs.txt
           if [ "$ERRORS" -gt 0 ]; then
             echo "⚠️  $ERRORS config hanno fallito il preflight (non blocking)"
           fi
