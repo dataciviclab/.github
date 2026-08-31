@@ -1,179 +1,142 @@
 # Piano di unificazione GCS Auth + Pipeline Standardizzate
 
-**Stato:** draft (2026-08-31)
+**Stato:** in corso (31/08/2026)
 **Obiettivo:** semplificare, uniformare e standardizzare il flusso end-to-end
   producer (pipeline → GCS) e consumer (dashboard ← GCS).
 
-## Contesto
+## Scoperta chiave
 
-L'org ha ~15 repo con pipeline che pubblicano dati su 2 bucket GCS pubblici
-(`dataciviclab-clean`, `dataciviclab-mart`). Ogni repo ha la propria Service
-Account con secret nome diverso, e il pipeline.yml è scritto da zero con
-pattern simili ma non identici.
+> `attribute.repository/*` NON funziona con GCP IAM quando i valori
+> contengono `/` (es. `dataciviclab/eurostat`). Il wildcard non matcha.
+> Fix: usare `attribute.repository_owner/dataciviclab` (senza slash).
 
-### Stato attuale (agosto 2026)
-
-| Repo | Secret | Auth | Path GCS |
-|------|--------|------|----------|
-| eurostat | `GCP_SA_KEY_EUROSTAT` | gcs-auth (SA key) | `eurostat/$slug/` |
-| open-siope | `GCP_SA_KEY` | gcs-auth (SA key) | `siope/` |
-| open-conto-annuale | `GCP_SA_KEY` | gcs-auth (SA key) | `conto-annuale/` |
-| senato-akn | `GCP_SA_KEY_SENATO_AKN` | gcs-auth (SA key) | `$slug/` (no prefix!) |
-| rna-aiuti-stato | `GCP_SA_KEY_RNA` | gcs-auth (SA key) | `$slug/` (no prefix!) |
-| opere-pubbliche-intelligence | `GCP_SA_KEY_OPI` | gcs-auth (SA key) | `opere_pubbliche_intelligence/$slug/$year/` |
-| debito-pubblico-intelligence | `GCP_SA_KEY_DPI` | gcs-auth (SA key) | `debito_pubblico_intelligence/$slug/$year/` |
-| open-politica | `GCP_SA_KEY_OPEN_POLITICA` | gcs-auth (SA key) | `open-politica/$slug/$year/` |
-| dcl-bologna | `GCP_SA_KEY_DCL_BOLOGNA` | inline (non usa gcs-auth) | *(placeholder D3)* |
-| dataset-incubator | WIF | google-github-actions/auth | `$slug/$year/` |
-| costituzione-italiana | — | nessun sync | — |
-
-**Problemi:** 8 SA key diverse, path non standardizzate, pipeline.yml duplicato 10 volte.
-
-### Info confermate
-
-- Bucket **pubblici** (lettura anonima)
-- Tutte le SA hanno gli **stessi permessi**: write su clean + mart
-- Ogni repo ha 1 SA dedicata (funzionalmente identiche)
-- Dashboard già pubbliche (Streamlit Cloud)
-
-## Architettura proposta
-
-### Principi
-
-1. **1 SA unica** → 1 Workload Identity Federation, zero chiavi statiche
-2. **Path contract standardizzato** → `gs://{bucket}/{repo-slug}/{dataset-slug}/{year}/`
-3. **Reusable pipeline workflow** → il 90% del logic in `.github`, ogni repo ~15 righe
-4. **Drift-check enforce** → verifica WIF + path contract automaticamente
+## Architettura (aggiornata)
 
 ### Componenti
 
 ```
 .github/
 ├── actions/
-│   ├── gcs-auth/action.yml          # WIF (legacy SA key come fallback)
-│   ├── python-setup/action.yml      # (invariato)
-│   ├── registry-update-pr/action.yml # (invariato)
-│   └── python-ci/action.yml         # (invariato)
+│   ├── gcs-auth/action.yml          # WIF + legacy SA key fallback
+│   ├── python-setup/action.yml
+│   ├── registry-update-pr/action.yml
+│   └── python-ci/action.yml
 ├── .github/workflows/
-│   ├── pipeline-reusable.yml        # NUOVO: reusable workflow completo
-│   ├── dataset-config-check-reusable.yml  # (invariato)
-│   └── test-audit-reusable.yml      # (invariato)
+│   ├── pipeline-reusable.yml        # ✅ REUSABLE (merged)
+│   ├── dataset-config-check-reusable.yml
+│   └── test-audit-reusable.yml
 └── scripts/
-    └── drift_check.py               # AGGIORNATO: verifica WIF + paths
+    └── drift_check.py
 ```
 
-### Path contract
+### Reusable workflow — Input disponibili
 
-```python
-# lab-connectors/lab_connectors/gcs/paths.py
-CLEAN_BUCKET = "dataciviclab-clean"
-MART_BUCKET = "dataciviclab-mart"
+| Input | Tipo | Default | Descrizione |
+|-------|------|---------|-------------|
+| `repo-slug` | string | (required) | Prefisso GCS/registry |
+| `run-command` | string | (required) | Comando make (es. `make run-all`) |
+| `sync-pattern` | string | `flat` | `flat` o `per-dataset` |
+| `pre-run-command` | string | `""` | Detect, codelists, bootstrap |
+| `verify-command` | string | `""` | Verify post-run |
+| `extra-env` | string | `""` | KEY=VALUE per riga |
+| `python-extra-packages` | string | `""` | pip extras |
 
-def clean_url(repo_slug, dataset_slug, year):
-    return f"https://storage.googleapis.com/{CLEAN_BUCKET}/{repo_slug}/{dataset_slug}/{year}/"
+### Template caller (~25 righe)
 
-def mart_url(repo_slug, dataset_slug, year):
-    return f"https://storage.googleapis.com/{MART_BUCKET}/{repo_slug}/{dataset_slug}/{year}/"
+```yaml
+jobs:
+  pipeline:
+    uses: dataciviclab/.github/.github/workflows/pipeline-reusable.yml@main
+    with:
+      repo-slug: <slug>
+      run-command: make run-all
+      verify-command: make verify
+    secrets: inherit
 ```
 
-## Piano di migrazione
+## Stato migrazione
 
-### Fase 1 — WIF + path contract (1-2 settimane)
+### ✅ Completati
 
-**Obiettivo:** eliminare le SA key, standardizzare le path GCS.
+| Repo | PR | Tipo |
+|------|----|------|
+| `.github` | #28 (merged) | pipeline-reusable.yml |
+| `eurostat` | #134 (merged) | WIF custom (detect logic) |
+| `open-conto-annuale` | #11 (merged) | WIF + reusable |
+| `open-siope` | #82 (aperta) | WIF + reusable |
+| `debito-pubblico-intelligence` | #11 (aperta) | WIF fix (no reusable) |
 
-- [x] Setup GCP Workload Identity Pool + Provider
-  - [x] Creare WIF Pool (`dataciviclab-pool`)
-  - [x] Creare WIF Provider (`github-actions`)
-  - [x] Creare 1 SA unica (`dcl-gcs-publisher`)
-  - [x] IAM: SA → roles/storage.objectAdmin su `dataciviclab-clean` e `dataciviclab-mart`
-  - [x] Binding: WIF Pool → workloadIdentityUser + serviceAccountTokenCreator sulla SA
-- [x] Aggiornare `gcs-auth@main` per supportare WIF
-  - [x] Fallback: se `GCP_WORKLOAD_IDENTITY_PROVIDER` è impostato → usa WIF
-  - [x] Altrimenti → usa SA key (legacy, per transizione)
-- [ ] Migrare 1 repo pilota (eurostat)
-  - [ ] Aggiungere `id-token: write` nel workflow
-  - [ ] Rimuovere `GCP_SA_KEY_EUROSTAT`
-  - [ ] Testare sync su GCS
-- [ ] Aggiornare `lab-connectors/gcs/paths.py` con path contract
-- [ ] Migrare altri repo (ordine: open-conto-annuale → open-siope → gli altri)
+### ⏳ Da migrare
 
-**Eliminare dopo validazione:**
-- [ ] `GCP_SA_KEY_EUROSTAT`
-- [ ] `GCP_SA_KEY`
-- [ ] `GCP_SA_KEY_SENATO_AKN`
-- [ ] `GCP_SA_KEY_RNA`
-- [ ] `GCP_SA_KEY_OPI`
-- [ ] `GCP_SA_KEY_DPI`
-- [ ] `GCP_SA_KEY_OPEN_POLITICA`
-- [ ] `GCP_SA_KEY_DCL_BOLOGNA`
+| Repo | Difficoltà | Candidate reusable | Note |
+|------|-----------|-------------------|------|
+| `opere-pubbliche-intelligence` | 🟢 bassa | ✅ sì | `make run-all && make layers && make panorama` |
+| `dcl-bologna` | 🟡 media | ✅ sì (con pre-run) | Bootstrap varchi-ztl |
+| `open-politica` | 🔴 alta | ❌ no | Detect complesso (compose/, ponte-persona) |
+| `senato-akn` | 🔴 alta | ❌ no | Self-hosted runner, extract incrementale |
+| `rna-aiuti-stato` | 🔴 alta | ❌ no | Self-hosted runner, full_batch, manifest |
 
-### Fase 2 — Reusable pipeline workflow (2-3 settimane)
+### ⚪ Non migrabili
 
-**Obiettivo:** ogni repo ha ~15 righe di YAML, il logic vive in `.github`.
+| Repo | Motivo |
+|------|--------|
+| `dataset-incubator` | Usa già WIF (pattern diverso) |
+| `costituzione-italiana` | Nessun sync GCS |
 
-- [ ] Creare `pipeline-reusable.yml` in `.github/.github/workflows/`
-- [ ] Aggiornare `project-template` con il pattern nuovo
-- [ ] Migrare repo semplici (eurostat, open-conto-annuale, open-siope)
-- [ ] Migrare repo complessi (open-politica, senato-akn, rna-aiuti-stato)
-- [ ] Estendere drift-check per verificare l'uso del reusable
+### 🔑 SA key da eliminare (dopo validazione)
 
-### Fase 3 — Cleanup (1 settimana)
+- `GCP_SA_KEY_EUROSTAT`
+- `GCP_SA_KEY` (open-siope, open-conto-annuale)
+- `GCP_SA_KEY_SENATO_AKN`
+- `GCP_SA_KEY_RNA`
+- `GCP_SA_KEY_OPI`
+- `GCP_SA_KEY_DPI`
+- `GCP_SA_KEY_OPEN_POLITICA`
+- `GCP_SA_KEY_DCL_BOLOGNA`
 
-- [ ] Eliminare SA key vecchie da GitHub
-- [ ] Aggiornare drift-check per WIF + path contract
-- [ ] Aggiornare documentazione (ADR, README, CONTRIBUTING)
-- [ ] Verificare che tutti i repo siano conformi
+## Prossimi passi
 
-### Fase 4 — Dashboard contract (futuro)
-
-- [ ] lab-connectors espone path contract completo
-- [ ] lab-dashboard e data-explorer migrano ai path ufficiali
-- [ ] Eventuale trigger automatico (repository_dispatch)
+1. ✅ Mergiare open-siope #82 + DPI #11
+2. ⏳ Migrare opere-pubbliche-intelligence + dcl-bologna
+3. 📋 Aggiornare project-template con pattern WIF + reusable
+4. 📋 Aggiornare drift-check per verificare WIF
+5. 🗑️ Eliminare SA key vecchie
+6. 📋 Aggiornare ADR-001 con Fase 1 + 2 completate
 
 ## Note operative
 
-### GCP Setup (da fare con accesso admin)
+### GCP Setup (completato)
 
-```bash
-# 1. Crea WIF Pool
-gcloud iam workload-identity-pools create dataciviclab-pool \
-  --location=global \
-  --display-name="DataCivicLab GitHub Actions"
+- Pool: `dataciviclab-pool` (project: `dataciviclab`, num: `217326868340`)
+- Provider: `github-actions` (issuer: `token.actions.githubusercontent.com`)
+- SA: `dcl-gcs-publisher@dataciviclab.iam.gserviceaccount.com`
+- IAM: `workloadIdentityUser` + `serviceAccountTokenCreator` su `attribute.repository_owner/dataciviclab`
+- API: `iamcredentials.googleapis.com` abilitata
+- Bucket: `objectAdmin` su `dataciviclab-clean` + `dataciviclab-mart`
 
-# 2. Crea Provider
-gcloud iam workload-identity-pools providers create-oidc github-actions \
-  --workload-identity-pool=dataciviclab-pool \
-  --location=global \
-  --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" \
-  --attribute-condition="assertion.repository_owner == 'dataciviclab'" \
-  --issuer-uri="https://token.actions.githubusercontent.com"
-
-# 3. Crea SA
-gcloud iam service-accounts create dcl-gcs-publisher \
-  --display-name="DataCivicLab GCS Publisher"
-
-# 4. IAM binding su SA (WIF può impersonare)
-gcloud iam service-accounts add-iam-policy-binding dcl-gcs-publisher@PROJECT_ID \
-  --role=roles/iam.workloadIdentityUser \
-  --member="principalSet://iam.googleapis.com/projects/PROJECT_NUM/locations/global/workloadIdentityPools/dataciviclab-pool/attribute.repository_owner/dataciviclab"
-
-# 5. IAM binding: WIF può generare token per la SA
-gcloud iam service-accounts add-iam-policy-binding dcl-gcs-publisher@PROJECT_ID \
-  --role=roles/iam.serviceAccountTokenCreator \
-  --member="principalSet://iam.googleapis.com/projects/PROJECT_NUM/locations/global/workloadIdentityPools/dataciviclab-pool/attribute.repository_owner/dataciviclab"
-
-# 6. IAM binding su bucket (SA può scrivere)
-gs iam ch serviceAccount:dcl-gcs-publisher@PROJECT_ID:objectAdmin \
-  gs://dataciviclab-clean
-gs iam ch serviceAccount:dcl-gcs-publisher@PROJECT_ID:objectAdmin \
-  gs://dataciviclab-mart
-```
-
-### GitHub Secrets da configurare
+### GitHub Secrets (org-level)
 
 ```
-ORGANIZATION-secrets:
-  GCP_WORKLOAD_IDENTITY_PROVIDER: "projects/PROJECT_NUM/locations/global/workloadIdentityPools/dataciviclab-pool/providers/github-actions"
-  GCP_SERVICE_ACCOUNT: "dcl-gcs-publisher@PROJECT_ID.iam.gserviceaccount.com"
+GCP_WORKLOAD_IDENTITY_PROVIDER: projects/217326868340/locations/global/workloadIdentityPools/dataciviclab-pool/providers/github-actions
+GCP_SERVICE_ACCOUNT: dcl-gcs-publisher@dataciviclab.iam.gserviceaccount.com
+```
+
+### Pattern WIF (per i nuovi repo)
+
+```yaml
+# Nel caller:
+env:
+  GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+  GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+# Nel job:
+permissions:
+  id-token: write
+
+# Auth:
+- uses: google-github-actions/auth@v3
+  with:
+    workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+    service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+- uses: google-github-actions/setup-gcloud@v3
 ```
