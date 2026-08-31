@@ -65,7 +65,7 @@ jobs:
           # Se configs è fornito, usa solo quelli; altrimenti find su globs
           if [ -n "$CONFIGS" ]; then
             echo "→ Modalità: configs specifici"
-            echo "$CONFIGS" > /tmp/configs.txt
+            echo "$CONFIGS" | tr " " "\n" > /tmp/configs.txt
           else
             echo "→ Modalità: tutti i dataset nei globs"
             : > /tmp/configs.txt
