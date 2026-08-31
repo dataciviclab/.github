@@ -156,12 +156,12 @@ gcloud iam service-accounts create dcl-gcs-publisher \
 # 4. IAM binding su SA (WIF può impersonare)
 gcloud iam service-accounts add-iam-policy-binding dcl-gcs-publisher@PROJECT_ID \
   --role=roles/iam.workloadIdentityUser \
-  --member="principalSet://iam.googleapis.com/projects/PROJECT_NUM/locations/global/workloadIdentityPools/dataciviclab-pool/attribute.repository/*"
+  --member="principalSet://iam.googleapis.com/projects/PROJECT_NUM/locations/global/workloadIdentityPools/dataciviclab-pool/attribute.repository_owner/dataciviclab"
 
 # 5. IAM binding: WIF può generare token per la SA
 gcloud iam service-accounts add-iam-policy-binding dcl-gcs-publisher@PROJECT_ID \
   --role=roles/iam.serviceAccountTokenCreator \
-  --member="principalSet://iam.googleapis.com/projects/PROJECT_NUM/locations/global/workloadIdentityPools/dataciviclab-pool/attribute.repository/*"
+  --member="principalSet://iam.googleapis.com/projects/PROJECT_NUM/locations/global/workloadIdentityPools/dataciviclab-pool/attribute.repository_owner/dataciviclab"
 
 # 6. IAM binding su bucket (SA può scrivere)
 gs iam ch serviceAccount:dcl-gcs-publisher@PROJECT_ID:objectAdmin \
