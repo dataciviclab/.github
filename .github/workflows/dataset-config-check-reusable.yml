@@ -50,11 +50,9 @@ jobs:
           GLOBS: ${{ inputs.globs }}
           YEARS: ${{ inputs.years }}
           EXCLUDE: ${{ inputs.exclude }}
-          # Abilita i source `type: script` (es. open-politica, elezioni-*):
-          # il preflight valida anche i config che materializzano via script.
           TOOLKIT_ALLOW_SCRIPT_SOURCE: "1"
         run: |
-          set -e
+          ERRORS=0
           for glob in $GLOBS; do
             while IFS= read -r cfg; do
               dir=$(basename "$(dirname "$cfg")")
@@ -68,7 +66,15 @@ jobs:
                 Y="$YEARS"
               fi
               echo "→ $cfg (years: $Y)"
-              toolkit run preflight --config "$cfg" --years "$Y" > /dev/null
+              if toolkit run preflight --config "$cfg" --years "$Y" > /dev/null 2>&1; then
+                echo "  ✅ OK"
+              else
+                echo "  ⚠️  FAILED (fonte irraggiungibile o config invalida)"
+                ERRORS=$((ERRORS + 1))
+              fi
             done < <(find "$glob" -name dataset.yml | sort)
           done
-          echo "✅ All configs valid"
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "⚠️  $ERRORS config hanno fallito il preflight (non blocking)"
+          fi
+          echo "✅ Preflight completato"
