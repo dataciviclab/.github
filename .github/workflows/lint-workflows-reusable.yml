@@ -1,0 +1,81 @@
+name: Lint Workflows (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      checkout-ref:
+        description: "Ref da checkout (default: github.ref)"
+        default: ""
+        type: string
+
+jobs:
+  lint-workflows:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.checkout-ref || github.ref }}
+          fetch-depth: 0
+
+      # ── actionlint: valida sintassi YAML + espressioni GitHub Actions ──
+      - name: Install actionlint
+        run: |
+          curl -sL https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz \
+            | tar xz -C /usr/local/bin actionlint
+
+      - name: Run actionlint
+        run: |
+          echo "🔍 Scanning .github/workflows/ ..."
+          if actionlint -color; then
+            echo "✅ Tutti i workflow YAML sono validi"
+          else
+            echo "❌ Errori trovati nei workflow YAML"
+            exit 1
+          fi
+
+      # ── Pattern check: cattura il bug "" in if: conditions ──
+      - name: Check dangerous patterns
+        run: |
+          ERRORS=0
+          echo "🔍 Checking dangerous patterns in workflows..."
+          for f in .github/workflows/*.yml; do
+            [ -f "$f" ] || continue
+            # Pattern 1: if: ... != "" (doppi apici in espressioni GitHub Actions)
+            if grep -nP 'if:\s.*!=\s*""' "$f"; then
+              echo "❌ $f: doppi apici in if: condition (usa '')"
+              ERRORS=$((ERRORS + 1))
+            fi
+            # Pattern 2: env.GCP_* con "" (doppi apici dove servono single quotes)
+            if grep -nP 'env\.\w+\s*!=\s*""' "$f"; then
+              echo "❌ $f: env.* con doppi apici in espressione"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "❌ $ERRORS pattern pericolosi trovati"
+            exit 1
+          fi
+          echo "✅ Nessun pattern pericoloso trovato"
+
+      # ── WIF compliance: se c'è WIF, serve id-token: write ──
+      - name: Check WIF compliance
+        run: |
+          ERRORS=0
+          echo "🔍 Checking WIF compliance..."
+          for f in .github/workflows/*.yml; do
+            [ -f "$f" ] || continue
+            if grep -q 'WORKLOAD_IDENTITY_PROVIDER\|google-github-actions/auth@' "$f"; then
+              if ! grep -q 'id-token:\s*write' "$f"; then
+                echo "❌ $f: usa WIF ma manca 'id-token: write' nelle permissions"
+                ERRORS=$((ERRORS + 1))
+              fi
+            fi
+          done
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "❌ $ERRORS workflow WIF non conformi"
+            exit 1
+          fi
+          echo "✅ Tutti i workflow WIF sono conformi"

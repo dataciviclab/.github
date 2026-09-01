@@ -1,6 +1,6 @@
 # Piano di unificazione GCS Auth + Pipeline Standardizzate
 
-**Stato:** in corso (31/08/2026)
+**Stato:** in corso (01/09/2026)
 **Obiettivo:** semplificare, uniformare e standardizzare il flusso end-to-end
   producer (pipeline → GCS) e consumer (dashboard ← GCS).
 
@@ -24,7 +24,8 @@
 ├── .github/workflows/
 │   ├── pipeline-reusable.yml        # ✅ REUSABLE (merged)
 │   ├── dataset-config-check-reusable.yml
-│   └── test-audit-reusable.yml
+│   ├── test-audit-reusable.yml
+│   └── lint-workflows-reusable.yml  # 🔜 Pre-merge validation (actionlint + patterns)
 └── scripts/
     └── drift_check.py
 ```
@@ -74,7 +75,7 @@ jobs:
 | `dcl-bologna` | 🟡 media | ✅ sì (con pre-run) | Bootstrap varchi-ztl |
 | `open-politica` | 🔴 alta | ❌ no | Detect complesso (compose/, ponte-persona) |
 | `senato-akn` | 🔴 alta | ❌ no | Self-hosted runner, extract incrementale |
-| `rna-aiuti-stato` | 🔴 alta | ❌ no | Self-hosted runner, full_batch, manifest |
+| `rna-aiuti-stato` | 🟢 completata | ❌ no | WIF inline (self-hosted, full_batch, manifest) |
 
 ### ⚪ Non migrabili
 
@@ -99,8 +100,8 @@ jobs:
 1. ✅ Mergiare open-siope #82 + DPI #11
 2. ⏳ Migrare opere-pubbliche-intelligence + dcl-bologna
 3. 📋 Aggiornare project-template con pattern WIF + reusable
-4. 📋 Aggiornare drift-check per verificare WIF
-5. 🗑️ Eliminare SA key vecchie
+4. ✅ lint-workflows-reusable.yml (actionlint + pattern check + WIF compliance)
+5. 🗑️ Eliminare SA key vecchie (conto-annuale già fatto)
 6. 📋 Aggiornare ADR-001 con Fase 1 + 2 completate
 
 ## Note operative

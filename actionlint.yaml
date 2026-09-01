@@ -1,0 +1,11 @@
+self-hosted-runner:
+  labels:
+    - rna-arm64
+    - rna-x64
+    - siope-x64
+    - conto-x64
+    - eurostat-x64
+    - dpi-x64
+    - opi-x64
+    - dcl-bologna-x64
+    - senato-x64
