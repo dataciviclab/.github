@@ -49,6 +49,10 @@ on:
         description: "Env vars extra (KEY=VALUE per riga)"
         default: ""
         type: string
+      runs-on:
+        description: "Runner label (es. ubuntu-latest, self-hosted)"
+        default: "ubuntu-latest"
+        type: string
     secrets:
       GCP_SA_KEY:
         required: false
@@ -63,7 +67,7 @@ env:
 
 jobs:
   pipeline:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
     permissions:
       contents: write
       pull-requests: write
