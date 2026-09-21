@@ -1,0 +1,186 @@
+# GCS Sync Reusable — DataCivicLab
+#
+# Workflow riusabile per sync output pipeline su Google Cloud Storage.
+# Wrappa: auth (WIF/SA key) + setup gcloud + rsync per flat o per-slug.
+#
+# Pattern coperti (90% dei repo):
+#   - flat: rsync intera dir out/data/{clean,mart}/ al prefisso repo
+#   - per-dataset: per slug dir in out/data/{clean,mart}/
+#     - slug da basename (default) o da dataset.yml name field
+#     - year opzionale (default: no)
+#     - exclusion regex opzionale
+#     - flat parquet files opzionale (copiati nella root dello slug)
+#
+# Caso non coperto (es. senato-akn derived parquet, rna SA key legacy):
+#   Mantieni sync inline nel caller e usa gcs-auth@main per l'auth.
+
+name: GCS Sync (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      repo-slug:
+        description: "Slug del repo per il path GCS (es. bologna, eurostat)"
+        required: true
+        type: string
+      sync-pattern:
+        description: "flat (rsync intera dir) o per-dataset (per slug/year)"
+        default: "flat"
+        type: string
+      layers:
+        description: "Space-separated layers da sync (default: clean mart)"
+        default: "clean mart"
+        type: string
+      year:
+        description: "Anno fijo per il path GCS (es. 2026). Vuoto = auto-detect da subdirs"
+        default: ""
+        type: string
+      sync-years:
+        description: "Includi anno nel path GCS (gs://.../slug/year/). Default: false"
+        default: "false"
+        type: boolean
+      exclude:
+        description: "Regex esclusione per rsync -x (es. _run|_validate|metadata\\.json$)"
+        default: ""
+        type: string
+      flat-files:
+        description: "Copia file parquet flat nella root dello slug (default: false)"
+        default: "false"
+        type: boolean
+      skip-sync:
+        description: "Salta il sync (utile se vuoi solo auth per step successivi)"
+        default: "false"
+        type: boolean
+    secrets:
+      GCP_SA_KEY:
+        required: false
+      GCP_WORKLOAD_IDENTITY_PROVIDER:
+        required: false
+      GCP_SERVICE_ACCOUNT:
+        required: false
+
+env:
+  GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+  GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+jobs:
+  sync:
+    if: inputs.skip-sync != 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      # ── Auth (WIF o SA key legacy) ──────────────────────────────────
+      - name: GCP Auth (WIF)
+        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != ''
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+
+      - name: GCP Auth (SA key legacy)
+        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER == '' && env.GCP_SA_KEY != ''
+        shell: bash
+        run: |
+          # Supporta sia JSON raw che base64 (pattern da gcs-auth action)
+          if echo "$GCP_SA_KEY" | python3 -c "import json,sys; json.load(sys.stdin)" 2>/dev/null; then
+            printf '%s\n' "$GCP_SA_KEY" > /tmp/gcp-key.json
+          else
+            printf '%s\n' "$GCP_SA_KEY" | base64 -d > /tmp/gcp-key.json 2>/dev/null
+          fi
+          if [ ! -s /tmp/gcp-key.json ]; then
+            echo "::error::GCP_SA_KEY non è un JSON valido né base64"
+            exit 1
+          fi
+          gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
+
+      - name: Set up gcloud
+        if: (env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '') || env.GCP_SA_KEY != ''
+        uses: google-github-actions/setup-gcloud@v3
+
+      # ── Sync flat: rsync intera dir out/data/{layer}/ ────────────────
+      - name: Sync to GCS (flat)
+        if: inputs.sync-pattern == 'flat' && (env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' || env.GCP_SA_KEY != '')
+        run: |
+          REPO="${{ inputs.repo-slug }}"
+          for layer in ${{ inputs.layers }}; do
+            src="out/data/$layer/"
+            if [ ! -d "$src" ]; then
+              echo "⚠️  $src non esiste — skip"
+              continue
+            fi
+            gsutil -m rsync -r "$src" "gs://dataciviclab-$layer/$REPO/"
+            echo "✅ $layer synced → gs://dataciviclab-$layer/$REPO/"
+          done
+
+      # ── Sync per-dataset: per slug dir in out/data/{layer}/ ──────────
+      - name: Sync to GCS (per-dataset)
+        if: inputs.sync-pattern == 'per-dataset' && (env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' || env.GCP_SA_KEY != '')
+        env:
+          INPUT_YEAR: ${{ inputs.year }}
+          SYNC_YEARS: ${{ inputs.sync-years }}
+          EXCLUDE: ${{ inputs.exclude }}
+          FLAT_FILES: ${{ inputs.flat-files }}
+          REPO_SLUG: ${{ inputs.repo-slug }}
+          LAYERS: ${{ inputs.layers }}
+        run: |
+          # Build rsync args
+          RSYNC_ARGS=""
+          if [ -n "$EXCLUDE" ]; then
+            RSYNC_ARGS="-x $EXCLUDE"
+          fi
+
+          for layer in $LAYERS; do
+            base="out/data/$layer"
+            [ -d "$base" ] || continue
+
+            for slug_dir in "$base"/*/; do
+              [ -d "$slug_dir" ] || continue
+              slug=$(basename "$slug_dir")
+
+              if [ -f "$slug_dir/dataset.yml" ]; then
+                slug_name=$(python3 -c "
+          import yaml, sys
+          with open('$slug_dir/dataset.yml') as f:
+              c = yaml.safe_load(f) or {}
+          print(c.get('name', '$slug'))
+          " 2>/dev/null || echo "$slug")
+              else
+                slug_name="$slug"
+              fi
+
+              # Year detection: input fijo, auto-detect, o none
+              if [ -n "$INPUT_YEAR" ]; then
+                years="$INPUT_YEAR"
+              elif [ "$SYNC_YEARS" = "true" ]; then
+                years=$(find "$slug_dir" -maxdepth 1 -mindepth 1 -type d -printf '%f\n' 2>/dev/null \
+                  | grep -vE '^_' | sort -rn | tr '\n' ' ')
+              else
+                years=""
+              fi
+
+              if [ -n "$years" ]; then
+                for year in $years; do
+                  [ -d "$slug_dir/$year" ] || continue
+                  gsutil -m rsync -r $RSYNC_ARGS \
+                    "$slug_dir/$year/" "gs://dataciviclab-$layer/$REPO_SLUG/$slug_name/$year/"
+                  echo "✅ $slug_name/$year $layer synced"
+                done
+              else
+                gsutil -m rsync -r $RSYNC_ARGS \
+                  "$slug_dir/" "gs://dataciviclab-$layer/$REPO_SLUG/$slug_name/"
+                echo "✅ $slug_name $layer synced"
+              fi
+
+              # Flat parquet files (es. multi-anno mart)
+              if [ "$FLAT_FILES" = "true" ]; then
+                for f in "$slug_dir"/*.parquet; do
+                  [ -f "$f" ] || continue
+                  gsutil -m cp "$f" "gs://dataciviclab-$layer/$REPO_SLUG/$slug_name/$(basename "$f")"
+                  echo "✅ $slug_name/$(basename "$f") $layer flat synced"
+                done
+              fi
+            done
+          done
