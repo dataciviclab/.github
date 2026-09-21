@@ -1,11 +1,17 @@
 name: 'Python Setup (org-level)'
 description: |
-  Setup Python 3.12 con pip cache e installa requirements.txt +
+  Setup Python 3.12 con pip cache e installa dipendenze (pyproject.toml o requirements.txt) +
   pacchetti extra opzionali.
 
   Action org-level disponibile per tutti i repo DataCivicLab.
   Il checkout deve essere fatto PRIMA di chiamare questa action
   (le composite action locali non possono contenere actions/checkout).
+
+  Install order:
+  1. pyproject.toml → pip install -e ".[dev]" (se esiste)
+  2. requirements.txt → pip install -r (legacy, se pyproject non esiste)
+  3. extra-requirements files
+  4. extra-packages
 
   Usage:
     - uses: actions/checkout@v6
@@ -40,13 +46,19 @@ runs:
         python-version: ${{ inputs.python-version }}
         cache: 'pip'
 
-    - name: Install core dependencies (if requirements.txt exists)
+    - name: Install core dependencies
       shell: bash
       run: |
-        if [ -f requirements.txt ]; then
+        if [ -f pyproject.toml ]; then
+          echo "::group::pip install -e .[dev]"
+          python -m pip install -e ".[dev]"
+          echo "::endgroup::"
+        elif [ -f requirements.txt ]; then
+          echo "::group::pip install -r requirements.txt"
           python -m pip install -r requirements.txt
+          echo "::endgroup::"
         else
-          echo "::notice::No requirements.txt found — skip core install"
+          echo "::notice::No pyproject.toml or requirements.txt found — skip core install"
         fi
 
     - name: Install extra requirements files
