@@ -4,10 +4,12 @@ on:
   workflow_call:
     inputs:
       install:
-        description: Comando pip per installare toolkit (e deps).
+        description: >
+          Comando pip per installare toolkit (e deps).
+          Default: pip install -e ".[dev,pipeline]"
         required: false
         type: string
-        default: "pip install git+https://github.com/dataciviclab/toolkit.git"
+        default: 'pip install -e ".[dev,pipeline]"'
       globs:
         description: >
           Directory da scandire per `dataset.yml`, separate da spazio.
