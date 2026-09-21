@@ -10,7 +10,7 @@
 # Il repo chiama con i propri input:
 #   - run-command: comando da eseguire (es. "make run-all")
 #   - repo-slug: prefisso GCS e registry
-#   - sync-pattern: "flat" (rsync intera dir) o "per-dataset" (per slug/year)
+#   - sync-pattern: "flat" (rsync intera dir out/) o "per-dataset" (per slug/year)
 
 name: Pipeline (reusable)
 
@@ -36,6 +36,10 @@ on:
       checkout-ref:
         description: "Ref da checkout (default: github.ref)"
         default: ""
+        type: string
+      install-extras:
+        description: "Extras pyproject da installare (default: dev,pipeline)"
+        default: "dev,pipeline"
         type: string
       python-extra-packages:
         description: "Extra packages per pip install"
@@ -81,6 +85,7 @@ jobs:
 
       - uses: dataciviclab/.github/actions/python-setup@main
         with:
+          install-extras: ${{ inputs.install-extras }}
           extra-packages: ${{ inputs.python-extra-packages }}
 
       # ── Extra env vars (opzionale) ──────────────────────────────────

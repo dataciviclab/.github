@@ -8,7 +8,7 @@ description: |
   (le composite action locali non possono contenere actions/checkout).
 
   Install order:
-  1. pyproject.toml → pip install -e ".[dev]" (se esiste)
+  1. pyproject.toml → pip install -e ".[extras]" (se esiste)
   2. requirements.txt → pip install -r (legacy, se pyproject non esiste)
   3. extra-requirements files
   4. extra-packages
@@ -17,6 +17,7 @@ description: |
     - uses: actions/checkout@v6
     - uses: dataciviclab/.github/actions/python-setup@main
       with:
+        install-extras: "dev,pipeline"
         extra-packages: ruff mypy
         extra-requirements: tools/clean-query-mcp/requirements.txt
 
@@ -24,6 +25,12 @@ inputs:
   python-version:
     description: Versione Python
     default: "3.12"
+    required: false
+  install-extras:
+    description: |
+      Extras da installare con pyproject.toml (comma-separated).
+      Default: "dev" (lint/test tools). Usa "dev,pipeline" per repo con toolkit.
+    default: "dev"
     required: false
   extra-packages:
     description: |
@@ -49,9 +56,10 @@ runs:
     - name: Install core dependencies
       shell: bash
       run: |
+        EXTRAS="${{ inputs.install-extras }}"
         if [ -f pyproject.toml ]; then
-          echo "::group::pip install -e .[dev]"
-          python -m pip install -e ".[dev]"
+          echo "::group::pip install -e .[$EXTRAS]"
+          python -m pip install -e ".[$EXTRAS]"
           echo "::endgroup::"
         elif [ -f requirements.txt ]; then
           echo "::group::pip install -r requirements.txt"
