@@ -59,7 +59,7 @@ runs:
           gh pr view "$PR_NUMBER" --json files --jq '.files[].path' | \
             grep -E "^($PATHS_REGEX)/" | \
             grep -vE "$EXCLUDE" | \
-            cut -d/ -f1-2 | sort -u > raw_dirs.txt
+            cut -d/ -f1-2 | sort -u > raw_dirs.txt || true
 
           while read -r d; do
             [ -n "$d" ] && [ -f "$d/dataset.yml" ] && echo "$d" >> changed.txt
