@@ -127,24 +127,28 @@ jobs:
           gsutil -m rsync -r out/data/clean/ gs://dataciviclab-clean/${{ inputs.repo-slug }}/
           echo "✅ Synced to gs://dataciviclab-mart|clean/${{ inputs.repo-slug }}/"
 
-      # Sync per-dataset: per slug/year
+      # Sync per-dataset: per slug, tutti gli anni
       - name: Sync to GCS (per-dataset)
         if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'per-dataset'
         run: |
           for slug_dir in out/data/clean/*/; do
             [ -d "$slug_dir" ] || continue
             slug=$(basename "$slug_dir")
-            year=$(ls "$slug_dir" 2>/dev/null | sort -rn | head -1)
-            [ -z "$year" ] && echo "⚠️  No clean output for $slug" && continue
-            gsutil -m rsync -r "${slug_dir}${year}/" "gs://dataciviclab-clean/${{ inputs.repo-slug }}/$slug/$year/"
+            for year_dir in "$slug_dir"*/; do
+              [ -d "$year_dir" ] || continue
+              year=$(basename "$year_dir")
+              gsutil -m rsync -r "$year_dir" "gs://dataciviclab-clean/${{ inputs.repo-slug }}/$slug/$year/"
+            done
             echo "✅ $slug clean synced"
           done
           for slug_dir in out/data/mart/*/; do
             [ -d "$slug_dir" ] || continue
             slug=$(basename "$slug_dir")
-            year=$(ls "$slug_dir" 2>/dev/null | sort -rn | head -1)
-            [ -z "$year" ] && echo "⚠️  No mart output for $slug" && continue
-            gsutil -m rsync -r "${slug_dir}${year}/" "gs://dataciviclab-mart/${{ inputs.repo-slug }}/$slug/$year/"
+            for year_dir in "$slug_dir"*/; do
+              [ -d "$year_dir" ] || continue
+              year=$(basename "$year_dir")
+              gsutil -m rsync -r "$year_dir" "gs://dataciviclab-mart/${{ inputs.repo-slug }}/$slug/$year/"
+            done
             echo "✅ $slug mart synced"
           done
 
