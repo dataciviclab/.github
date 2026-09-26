@@ -127,6 +127,18 @@ jobs:
         if: inputs.detect-paths != '' && github.event_name == 'pull_request' && steps.detect.outputs.found != 'true'
         run: echo "✅ Nessun dataset cambiato — skip run"
 
+      # ── Build batch per schedule/dispatch (tutti i dataset) ─────────
+      - name: Build batch — all datasets
+        if: inputs.detect-paths != '' && github.event_name != 'pull_request'
+        run: |
+          : > batch.txt
+          for base in ${{ inputs.detect-paths }}; do
+            [ -d "$base" ] || continue
+            find "$base" -maxdepth 2 -name dataset.yml | sort >> batch.txt
+          done
+          echo "📦 $(wc -l < batch.txt | tr -d ' ') dataset (schedule/dispatch — tutti)"
+          cat batch.txt
+
       # ── Run datasets ────────────────────────────────────────────────
       - name: Run datasets
         if: inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true'
