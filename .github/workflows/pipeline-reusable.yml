@@ -2,15 +2,16 @@
 #
 # Workflow unico post-merge + refresh. Gestisce:
 #   1. checkout + python-setup
-#   2. pre-run (opzionale: detect, codelists, bootstrap)
-#   3. run (make target passato come input)
-#   4. GCS auth (WIF) + sync (clean + mart)
-#   5. registry → PR draft
+#   2. pre-run (opzionale: codelists, bootstrap)
+#   3. detect (opzionale: solo dataset cambiati)
+#   4. run (make target passato come input)
+#   5. GCS auth (WIF) + sync (clean + mart)
+#   6. registry → PR draft
 #
 # Il repo chiama con i propri input:
-#   - run-command: comando da eseguire (es. "make run-all")
+#   - run-command: comando da eseguire (es. "make run-all" o "toolkit run --batch batch.txt")
 #   - repo-slug: prefisso GCS e registry
-#   - sync-pattern: "flat" (rsync intera dir out/) o "per-dataset" (per slug/year)
+#   - detect-paths: directory da monitorare (es. "datasets compose"). Vuoto = run all
 
 name: Pipeline (reusable)
 
@@ -53,6 +54,10 @@ on:
         description: "Env vars extra (KEY=VALUE per riga)"
         default: ""
         type: string
+      detect-paths:
+        description: "Directory da monitorare per detect (es. 'datasets compose'). Vuoto = run all"
+        default: ""
+        type: string
       runs-on:
         description: "Runner label (es. ubuntu-latest, self-hosted)"
         default: "ubuntu-latest"
@@ -93,13 +98,38 @@ jobs:
         if: inputs.extra-env != ''
         run: echo "${{ inputs.extra-env }}" >> "$GITHUB_ENV"
 
-      # ── Pre-run (opzionale: detect, codelists, bootstrap) ───────────
+      # ── Pre-run (opzionale: codelists, bootstrap) ───────────────────
       - name: Pre-run
         if: inputs.pre-run-command != ''
         run: ${{ inputs.pre-run-command }}
 
+      # ── Detect changed datasets (solo su PR, skip su schedule/dispatch)
+      - name: Detect changed datasets
+        if: inputs.detect-paths != '' && github.event_name == 'pull_request'
+        id: detect
+        uses: dataciviclab/.github/actions/detect-changed-datasets@main
+        with:
+          paths: ${{ inputs.detect-paths }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build batch from detect
+        if: inputs.detect-paths != '' && github.event_name == 'pull_request' && steps.detect.outputs.found == 'true'
+        run: |
+          : > batch.txt
+          for dir in ${{ steps.detect.outputs.dirs }}; do
+            [ -f "$dir/dataset.yml" ] && echo "$dir/dataset.yml" >> batch.txt
+          done
+          echo "📦 $(wc -l < batch.txt | tr -d ' ') dataset da processare"
+          cat batch.txt
+
+      - name: Skip — nothing changed
+        if: inputs.detect-paths != '' && github.event_name == 'pull_request' && steps.detect.outputs.found != 'true'
+        run: echo "✅ Nessun dataset cambiato — skip run"
+
       # ── Run datasets ────────────────────────────────────────────────
       - name: Run datasets
+        if: inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true'
         run: ${{ inputs.run-command }}
 
       # ── Verify (opzionale) ──────────────────────────────────────────
@@ -109,19 +139,19 @@ jobs:
 
       # ── GCS auth + sync ─────────────────────────────────────────────
       - name: GCP Auth (for GCS push)
-        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != ''
+        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true')
         uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
 
       - name: Set up gcloud
-        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != ''
+        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true')
         uses: google-github-actions/setup-gcloud@v3
 
       # Sync flat: rsync intera dir out/ al prefisso repo
       - name: Sync to GCS (flat)
-        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'flat'
+        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'flat' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true')
         run: |
           gsutil -m rsync -r out/data/mart/ gs://dataciviclab-mart/${{ inputs.repo-slug }}/
           gsutil -m rsync -r out/data/clean/ gs://dataciviclab-clean/${{ inputs.repo-slug }}/
@@ -129,7 +159,7 @@ jobs:
 
       # Sync per-dataset: per slug, tutti gli anni
       - name: Sync to GCS (per-dataset)
-        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'per-dataset'
+        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'per-dataset' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true')
         run: |
           for slug_dir in out/data/clean/*/; do
             [ -d "$slug_dir" ] || continue
@@ -154,6 +184,7 @@ jobs:
 
       # ── Registry → draft PR ──────────────────────────────────────────
       - name: Registry update PR
+        if: inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true'
         uses: dataciviclab/.github/actions/registry-update-pr@main
         with:
           prefix: ${{ inputs.repo-slug }}
