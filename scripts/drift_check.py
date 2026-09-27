@@ -9,21 +9,22 @@ Risultati per severità:
   WARN  — disallineamenti minori, non bloccano (exit 0).
 
 Casi verificati per ogni repo in scope:
-  A. `test-audit.yml` deve referenziare il reusable (`test-audit-reusable.yml`),
-     non duplicarne il contenuto inline.
-  B. i workflow con `setup-python` inline dovrebbero usare l'action org
+  A. i workflow con `setup-python` inline dovrebbero usare l'action org
      `dataciviclab/.github/actions/python-setup`.
-  C. le versioni di `actions/checkout`, `actions/setup-python` e
+  B. le versioni di `actions/checkout`, `actions/setup-python` e
      `actions/upload-artifact` devono appartenere all'allowlist canonica.
-  D. i workflow che eseguono pytest inline dovrebbero usare la composite
+  C. i workflow che eseguono pytest inline dovrebbero usare la composite
      action `dataciviclab/.github/actions/python-ci`.
-  E. i repo pipeline usano `gcs-auth` per l'auth GCS (non gcloud inline).
-  F. i repo pipeline usano `registry-update-pr` (composite action, nello
+  D. i repo pipeline usano `gcs-auth` per l'auth GCS (non gcloud inline).
+  E. i repo pipeline usano `registry-update-pr` (composite action, nello
      stesso job del run: il registry deriva le entry dai parquet locali).
-  G. i repo pipeline usano `dataset-config-check-reusable` per il loop preflight.
+  F. i repo pipeline usano `dataset-config-check-reusable` per il loop preflight.
+
+La lista dei repo viene letta da `dataciviclab.config.yml` (agent-context-builder),
+che viene aggiornata automaticamente ogni giorno dal workflow discover-registries.
 
 Uso (locale):
-  python scripts/drift_check.py [--token $GITHUB_TOKEN]
+  python scripts/drift_check.py [--token $GITHUB_TOKEN] [--config path/to/config.yml]
 
 In CI (workflow `templates.yml`) il report viene anche scritto in
 `$GITHUB_STEP_SUMMARY`.
@@ -33,6 +34,7 @@ Dipendenze: solo stdlib.
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import re
@@ -40,40 +42,43 @@ import sys
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
+from pathlib import Path
 
 API = "https://api.github.com"
 RAW_ACCEPT = "application/vnd.github.raw"
 
-# Repo in scope per il drift-check: core pipeline + repo dataset + CI Python.
-# Aggiungere un repo quando adotta il modello del layer condiviso (ADR-001).
-REPOS = [
-    "toolkit",
-    "lab-connectors",
-    "source-observatory",
-    "dataset-incubator",
-    "data-explorer",
-    "lab-dashboard",
-    "agent-context-builder",
-    "eurostat",
-    "open-siope",
-    "open-conto-annuale",
-    "dcl-bologna",
-    "italia-corpus",
-    "open-politica",
-    "senato-akn",
-    "rna-aiuti-stato",
-    "costituzione-italiana",
-    "partecipate-monitor",
-    "project-template",
-]
+# Percorso default del config ACB (relativo a questo script).
+_DEFAULT_CONFIG = Path(__file__).resolve().parent.parent.parent / (
+    "infra/agent-context-builder/dataciviclab.config.yml"
+)
 
-# Consapevolmente fuori scope:
-#   - data-advocacy (privato: il GITHUB_TOKEN della CI non può leggerlo)
-#   - dataciviclab (hub: notebook validation, non CI Python)
-#   - openbdap-saldi-storico-stato (solo seed-issues, nessuna pipeline)
-#   - lab-ops, opere-pubbliche-intelligence, terzo-settore-intelligence,
-#     progetto-pilota (nessun workflow)
-#   - .github (repo del check stesso)
+# Repo da escludere dalla scope (anche se presenti nel config).
+_EXCLUDE = {
+    "dataciviclab",   # hub: notebook validation, non CI Python
+    "data-advocacy",  # privato: il GITHUB_TOKEN della CI non può leggerlo
+    ".github",        # repo del check stesso
+}
+
+
+def _load_repos_from_config(config_path: Path) -> list[str]:
+    """Legge la lista repo da dataciviclab.config.yml (formato YAML semplice)."""
+    text = config_path.read_text(encoding="utf-8")
+    in_repos = False
+    repos: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("repos:"):
+            in_repos = True
+            continue
+        if in_repos:
+            if stripped.startswith("- "):
+                name = stripped[2:].strip()
+                if name and not name.startswith("#"):
+                    repos.append(name)
+            elif stripped and not stripped.startswith("#"):
+                # fine della sezione repos
+                break
+    return repos
 
 # Versioni canoniche delle action di piattaforma (target da standardizzare).
 # I componenti condivisi in questo repo devono allinearsi qui (ADR-001 §5).
@@ -83,7 +88,6 @@ CANONICAL = {
     "actions/upload-artifact": "v7",
 }
 
-REUSABLE_TEST_AUDIT = "test-audit-reusable.yml"
 ORG_ACTION_PYTHON_SETUP = "dataciviclab/.github/actions/python-setup"
 ORG_ACTION_GCS_AUTH = "dataciviclab/.github/actions/gcs-auth"
 ORG_ACTION_REGISTRY_PR = "dataciviclab/.github/actions/registry-update-pr"
@@ -141,17 +145,6 @@ def fetch_workflows(repo: str, ref: str, token: str | None) -> dict[str, str]:
 def default_branch(repo: str, token: str | None) -> str:
     data = api(f"{API}/repos/dataciviclab/{repo}", token)
     return str(data["default_branch"])
-
-
-def check_test_audit(repo: str, workflows: dict[str, str], report: Report) -> None:
-    for name, text in workflows.items():
-        if name != "test-audit.yml":
-            continue
-        if REUSABLE_TEST_AUDIT not in text:
-            report.errors.append(
-                f"{repo}: .github/workflows/{name} è una copia inline — "
-                f"chiama il reusable dataciviclab/.github/.github/workflows/{REUSABLE_TEST_AUDIT}"
-            )
 
 
 def check_inline_setup_python(
@@ -237,13 +230,28 @@ def render(report: Report) -> list[str]:
 
 
 def main() -> int:
-    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("DRIFT_CHECK_TOKEN")
+    parser = argparse.ArgumentParser(description="Drift-check cross-repo DataCivicLab")
+    parser.add_argument("--token", default=None, help="GitHub token (or set GITHUB_TOKEN)")
+    parser.add_argument(
+        "--config", default=str(_DEFAULT_CONFIG),
+        help="Path to dataciviclab.config.yml (default: agent-context-builder config)",
+    )
+    args = parser.parse_args()
+
+    token = args.token or os.environ.get("GITHUB_TOKEN") or os.environ.get("DRIFT_CHECK_TOKEN")
     if not token:
         print("⚠️  Nessun token: API non autenticata (rate limit basso). "
               "Passa GITHUB_TOKEN/DRIFT_CHECK_TOKEN per risultati affidabili.")
 
+    config_path = Path(args.config)
+    if not config_path.exists():
+        print(f"❌ Config non trovato: {config_path}")
+        return 1
+    repos = [r for r in _load_repos_from_config(config_path) if r not in _EXCLUDE]
+    print(f"📋 {len(repos)} repo da {config_path.name}")
+
     report = Report()
-    for repo in REPOS:
+    for repo in repos:
         try:
             ref = default_branch(repo, token)
             workflows = fetch_workflows(repo, ref, token)
@@ -257,7 +265,6 @@ def main() -> int:
             raise
         if not workflows:
             continue
-        check_test_audit(repo, workflows, report)
         check_inline_setup_python(repo, workflows, report)
         check_action_versions(repo, workflows, report)
         check_python_ci(repo, workflows, report)

@@ -18,8 +18,8 @@ e dialetti diversi. Evidenza raccolta a 2026-08-16:
   - blocco "registry → diff → draft PR" post-merge in eurostat e open-siope
     (~40 righe ciascuno);
   - blocco "auth GCS (JSON/base64) → gcloud" duplicato.
-- **Migrazione incompleta**: `test-audit-reusable.yml` è adottato da 3 repo,
-  ma `lab-connectors` ha ancora la copia inline.
+- **Migrazione incompleta**: lab-connectors ha ancora la copia inline di
+  `setup-python`.
 - **Naming ambiguo**: `smoke-weekly.yml` significa cose diverse in
   `lab-connectors` (probe manifest GCS) e `dataset-incubator` (probe
   raggiungibilità fonti).
@@ -83,7 +83,6 @@ nel repo come input/condizioni, non come codice duplicato.
 | `gcs-auth` | composite action | blocco auth GCS JSON/base64 |
 | `registry-update-pr` | composite action | blocco registry→diff→draft PR (nello stesso job del run: il registry deriva le entry dai parquet locali) |
 | `dataset-config-check-reusable` | reusable workflow | blocchi preflight dei dataset |
-| `test-audit-reusable` | reusable workflow | già esistente; completare migrazione lab-connectors |
 
 **Nota su `python-ci` (composite action, non reusable workflow):** i CI Python
 dei repo differiscono per build job, upload coverage, validazioni extra e
@@ -181,7 +180,7 @@ sul pyproject.
 2. [x] `templates.yml` → drift-check (`scripts/drift_check.py`: ERROR su copie
        inline dei reusable, WARN su setup-python inline e versioni action
        fuori allowlist) — componenti condivisi allineati a canonical v7
-3. [ ] Migrare `lab-connectors` su `python-setup` + `test-audit-reusable`
+3. [x] Rimuovere `test-audit.yml` dai repo dati (mantenuto solo per toolkit/lab-connectors)
 4. [x] Estrarre `python-ci` (composite action ruff+mypy+pytest) e migrare i
        CI Python (toolkit, lab-connectors, source-observatory,
        agent-context-builder, lab-dashboard)
