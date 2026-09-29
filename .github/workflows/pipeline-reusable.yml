@@ -12,6 +12,7 @@
 #   - run-command: comando da eseguire (es. "make run-all" o "toolkit run --batch batch.txt")
 #   - repo-slug: prefisso GCS e registry
 #   - detect-paths: directory da monitorare (es. "datasets compose"). Vuoto = run all
+#   - run-batch-command: comando alternativo per batch selettivo su PR (opzionale)
 
 name: Pipeline (reusable)
 
@@ -25,6 +26,10 @@ on:
       run-command:
         description: "Comando da eseguire per i dataset (es. make run-all)"
         required: true
+        type: string
+      run-batch-command:
+        description: "Comando alternativo per batch selettivo su PR (es. make run-batch). Vuoto = usa run-command"
+        default: ""
         type: string
       sync-pattern:
         description: "flat (rsync intera dir out/) o per-dataset (per slug/year)"
@@ -139,10 +144,25 @@ jobs:
           echo "📦 $(wc -l < batch.txt | tr -d ' ') dataset (schedule/dispatch — tutti)"
           cat batch.txt
 
+      # ── Resolve run command (batch vs full) ──────────────────────────
+      - name: Resolve run command
+        id: run-cmd
+        if: inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true'
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ] && \
+             [ -n "${{ inputs.run-batch-command }}" ] && \
+             [ -s batch.txt ]; then
+            echo "cmd=${{ inputs.run-batch-command }}" >> "$GITHUB_OUTPUT"
+            echo "🔧 Batch mode: ${{ inputs.run-batch-command }}"
+          else
+            echo "cmd=${{ inputs.run-command }}" >> "$GITHUB_OUTPUT"
+            echo "🔧 Full mode: ${{ inputs.run-command }}"
+          fi
+
       # ── Run datasets ────────────────────────────────────────────────
       - name: Run datasets
         if: inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true'
-        run: ${{ inputs.run-command }}
+        run: ${{ steps.run-cmd.outputs.cmd }}
 
       # ── Verify (opzionale) ──────────────────────────────────────────
       - name: Verify output

@@ -22,6 +22,7 @@ Casi verificati per ogni repo in scope:
 
 La lista dei repo viene letta da `dataciviclab.config.yml` (agent-context-builder),
 che viene aggiornata automaticamente ogni giorno dal workflow discover-registries.
+In CI fetcha il config da GitHub API; localmente usa il file se presente.
 
 Uso (locale):
   python scripts/drift_check.py [--token $GITHUB_TOKEN] [--config path/to/config.yml]
@@ -63,6 +64,25 @@ _EXCLUDE = {
 def _load_repos_from_config(config_path: Path) -> list[str]:
     """Legge la lista repo da dataciviclab.config.yml (formato YAML semplice)."""
     text = config_path.read_text(encoding="utf-8")
+    return _parse_repos_yaml(text)
+
+
+def _load_repos_from_github(token: str | None) -> list[str]:
+    """Fetch config da GitHub API (agent-context-builder/dataciviclab.config.yml)."""
+    url = (
+        f"{API}/repos/dataciviclab/agent-context-builder"
+        "/contents/dataciviclab.config.yml?ref=main"
+    )
+    req = urllib.request.Request(
+        url, headers={**api_headers(token), "Accept": RAW_ACCEPT}
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        text = resp.read().decode("utf-8", "replace")
+    return _parse_repos_yaml(text)
+
+
+def _parse_repos_yaml(text: str) -> list[str]:
+    """Estrae la lista repo da un YAML semplice con chiave 'repos:'."""
     in_repos = False
     repos: list[str] = []
     for line in text.splitlines():
@@ -76,7 +96,6 @@ def _load_repos_from_config(config_path: Path) -> list[str]:
                 if name and not name.startswith("#"):
                     repos.append(name)
             elif stripped and not stripped.startswith("#"):
-                # fine della sezione repos
                 break
     return repos
 
@@ -243,12 +262,25 @@ def main() -> int:
         print("⚠️  Nessun token: API non autenticata (rate limit basso). "
               "Passa GITHUB_TOKEN/DRIFT_CHECK_TOKEN per risultati affidabili.")
 
+    # Fetch config: GitHub API di default, fallback a file locale se --config esplicito
     config_path = Path(args.config)
-    if not config_path.exists():
-        print(f"❌ Config non trovato: {config_path}")
+    explicit_config = "--config" in sys.argv
+    if explicit_config and config_path.exists():
+        repos = [r for r in _load_repos_from_config(config_path) if r not in _EXCLUDE]
+        print(f"📋 {len(repos)} repo da {config_path.name} (locale)")
+    elif token:
+        try:
+            repos = [r for r in _load_repos_from_github(token) if r not in _EXCLUDE]
+            print(f"📋 {len(repos)} repo da agent-context-builder (GitHub API)")
+        except urllib.error.HTTPError as exc:
+            print(f"❌ Impossibile fetchare config da GitHub: {exc.code}")
+            return 1
+    elif config_path.exists():
+        repos = [r for r in _load_repos_from_config(config_path) if r not in _EXCLUDE]
+        print(f"📋 {len(repos)} repo da {config_path.name} (locale, fallback)")
+    else:
+        print("❌ Nessun config disponibile (né GitHub API né file locale)")
         return 1
-    repos = [r for r in _load_repos_from_config(config_path) if r not in _EXCLUDE]
-    print(f"📋 {len(repos)} repo da {config_path.name}")
 
     report = Report()
     for repo in repos:
