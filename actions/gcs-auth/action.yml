@@ -1,37 +1,11 @@
 name: 'GCS Auth (org-level)'
-description: |
-  Auth GCP per sync GCS — supporta Workload Identity Federation (WIF)
-  e Service Account key (legacy).
-
-  ## Pattern WIF (consigliato, zero chiavi statiche)
-
-  Il caller autentica PRIMA con google-github-actions/auth, poi chiama questa
-  action che rileva l'auth esistente:
-
-    - uses: google-github-actions/auth@v3
-      id: gcp-auth
-      with:
-        workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-        service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-    - uses: dataciviclab/.github/actions/gcs-auth@main
-    - name: Sync to GCS
-      if: steps.gcs.outputs.ready == 'true'
-      run: ...
-
-  ## Pattern SA key (legacy, in fase di eliminazione)
-
-  Il caller passa il secret come env `GCP_SA_KEY` sullo step:
-
-    - uses: dataciviclab/.github/actions/gcs-auth@main
-      env:
-        GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}   # es. secrets.GCP_SA_KEY_EUROSTAT
-    - name: Sync to GCS
-      if: steps.gcs.outputs.ready == 'true'
-      run: ...
-
-  Output `ready`:
-    - `true`  — auth riuscita (WIF o SA key)
-    - `false` — nessun metodo configurato (skip sync, non fallisce)
+description: >
+  Auth GCP per sync GCS — WIF (consigliato) o SA key (legacy).
+  Il caller deve autenticare PRIMA con google-github-actions/auth@v3
+  (workload_identity_provider + service_account) oppure passare env GCP_SA_KEY.
+  Non usare espressioni secrets nella description: GitHub fa template
+  validation anche sugli esempi nel description e fallisce il load.
+  Output: ready=true|false.
 
 outputs:
   ready:
