@@ -85,12 +85,12 @@ jobs:
               echo "→ $cfg (skip: $dir)"
               continue
             fi
-            if [ ! -f "$cfg/dataset.yml" ]; then
+            if [ ! -f "$cfg" ]; then
               echo "  SKIP (no dataset.yml)"
               continue
             fi
             if [ "$YEARS" = "from-config" ]; then
-              Y=$(python3 -c "import yaml; print(','.join(str(x) for x in yaml.safe_load(open('$cfg/dataset.yml'))['dataset']['years']))")
+              Y=$(python3 -c "import yaml; print(','.join(str(x) for x in yaml.safe_load(open('$cfg'))['dataset']['years']))")
             else
               Y="$YEARS"
             fi
