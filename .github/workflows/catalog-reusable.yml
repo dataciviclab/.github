@@ -1,0 +1,77 @@
+# Catalog (reusable) — DataCivicLab
+#
+# Workflow riusabile per generare/aggiornare il source catalog per-repo
+# (`registry/catalog.json`) con l'engine SO condiviso.
+#
+# Differenze chiave da pipeline-reusable:
+#   - ZERO secrets: niente GCS/WIF — il catalog è solo JSON in git
+#   - nessun run pregresso: probe + inventario live della fonte; la
+#     continuità (streak, baseline) arriva dal catalog.json committato
+#   - trigger indipendente dalla pipeline dati (la fonte upstream cambia
+#     per conto proprio)
+#
+# Il repo chiama con i propri input:
+#   - repo-slug: usato nel titolo PR di fallback
+#   - catalog-args: argomenti per so-catalog (es. "--workers 4")
+#   - dry-run: valida la build senza creare PR (usato sui PR che toccano
+#     pyproject.toml / la config [tool.observatory])
+
+name: Catalog (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      repo-slug:
+        description: "Slug del repo (es. eurostat, open-mur)"
+        required: true
+        type: string
+      install-extras:
+        description: "Extras pyproject da installare (deve includere 'observatory')"
+        default: "dev,observatory"
+        type: string
+      catalog-args:
+        description: "Argomenti extra per so-catalog (es. --workers 4)"
+        default: ""
+        type: string
+      dry-run:
+        description: "Build senza scrivere/committare (validazione PR)"
+        default: false
+        type: boolean
+      runs-on:
+        description: "Runner label"
+        default: "ubuntu-latest"
+        type: string
+
+jobs:
+  catalog:
+    runs-on: ${{ inputs.runs-on || 'ubuntu-latest' }}
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: dataciviclab/.github/actions/python-setup@main
+        with:
+          install-extras: ${{ inputs.install-extras }}
+
+      - name: Build catalog (dry-run)
+        if: inputs.dry-run
+        shell: bash
+        run: |
+          command -v so-catalog >/dev/null 2>&1 || {
+            echo "::error::so-catalog non trovato — extra 'observatory' installato?"
+            exit 1
+          }
+          so-catalog ${{ inputs.catalog-args }} --dry-run
+
+      - name: Build catalog + draft PR
+        if: ${{ !inputs.dry-run }}
+        uses: dataciviclab/.github/actions/catalog-update-pr@main
+        with:
+          catalog-args: ${{ inputs.catalog-args }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
