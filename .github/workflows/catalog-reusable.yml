@@ -41,6 +41,10 @@ on:
         description: "Runner label"
         default: "ubuntu-latest"
         type: string
+      blocked-source-proxy:
+        description: "Proxy per fonti che bloccano i runner GHA (BLOCKED_SOURCE_PROXY)"
+        required: false
+        type: string
 
 jobs:
   catalog:
@@ -49,6 +53,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    env:
+      BLOCKED_SOURCE_PROXY: ${{ inputs.blocked-source-proxy }}
 
     steps:
       - uses: actions/checkout@v7
