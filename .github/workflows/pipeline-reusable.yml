@@ -12,7 +12,14 @@
 #   - run-command: comando da eseguire (es. "make run-all" o "toolkit run --batch batch.txt")
 #   - repo-slug: prefisso GCS e registry
 #   - detect-paths: directory da monitorare (es. "datasets compose"). Vuoto = run all
-#   - run-batch-command: comando alternativo per batch selettivo su PR (opzionale)
+#   - run-batch-command: comando per il batch selettivo su PR (opzionale)
+#
+# Batch selettivo (evita di rieseguire tutti i dataset a ogni merge):
+#   basta `detect-paths` + un target `run-batch` nel Makefile del repo.
+#   Il target può includere i pre-step del repo (seeds, codelists, env) che un
+#   comando generico salterebbe. Se nessuno dei due è presente, la pipeline
+#   esegue il run completo ed emette un warning.
+#   Con `detect-paths` vuoto non si fa detect: il batch non è disponibile.
 
 name: Pipeline (reusable)
 
@@ -28,7 +35,7 @@ on:
         required: true
         type: string
       run-batch-command:
-        description: "Comando alternativo per batch selettivo su PR (es. make run-batch). Vuoto = usa run-command"
+        description: "Comando per il batch selettivo su PR (es. make run-batch). Vuoto = auto-detect: usa `make run-batch` se il Makefile del repo definisce il target, altrimenti `run-command` (con warning se detect-paths e' impostato e il batch viene ignorato)"
         default: ""
         type: string
       sync-pattern:
@@ -145,18 +152,41 @@ jobs:
           cat batch.txt
 
       # ── Resolve run command (batch vs full) ──────────────────────────
+      # Batch selettivo: solo su PR, con detect-paths impostato e batch.txt
+      # non vuoto. Ordine di risoluzione (il primo che esiste vince):
+      #   1. `run-batch-command` esplicito
+      #   2. `make run-batch` se il Makefile del repo definisce il target
+      #      (convenzione consigliata: il target può includere i pre-step del
+      #      repo — seeds, codelists, env — che un comando generico salterebbe)
+      #   3. `run-command` se consuma già batch.txt
+      #   4. `run-command` (run completo) + warning: il detect è sprecato
       - name: Resolve run command
         id: run-cmd
         if: inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true'
+        env:
+          RUN_COMMAND: ${{ inputs.run-command }}
+          RUN_BATCH_COMMAND: ${{ inputs.run-batch-command }}
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ] && \
-             [ -n "${{ inputs.run-batch-command }}" ] && \
-             [ -s batch.txt ]; then
-            echo "cmd=${{ inputs.run-batch-command }}" >> "$GITHUB_OUTPUT"
-            echo "🔧 Batch mode: ${{ inputs.run-batch-command }}"
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ -s batch.txt ]; then
+            if [ -n "$RUN_BATCH_COMMAND" ]; then
+              CMD="$RUN_BATCH_COMMAND"; WHY="run-batch-command"
+            elif grep -qE '^run-batch:' Makefile 2>/dev/null; then
+              CMD="make run-batch"; WHY="target run-batch nel Makefile"
+            elif printf '%s' "$RUN_COMMAND" | grep -q 'batch.txt'; then
+              CMD="$RUN_COMMAND"; WHY="run-command consuma batch.txt"
+            else
+              CMD="$RUN_COMMAND"; WHY=""
+            fi
+            echo "cmd=$CMD" >> "$GITHUB_OUTPUT"
+            if [ -n "$WHY" ]; then
+              echo "🔧 Batch mode: $CMD  [$WHY]"
+            else
+              echo "🔧 Full mode: $CMD"
+              echo "::warning title=detect-paths senza batch::detect-paths e' impostato ma il run e' completo: batch.txt viene costruito e ignorato. Definisci un target 'run-batch' nel Makefile (o imposta run-batch-command) per eseguire solo i dataset cambiati."
+            fi
           else
-            echo "cmd=${{ inputs.run-command }}" >> "$GITHUB_OUTPUT"
-            echo "🔧 Full mode: ${{ inputs.run-command }}"
+            echo "cmd=$RUN_COMMAND" >> "$GITHUB_OUTPUT"
+            echo "🔧 Full mode: $RUN_COMMAND"
           fi
 
       # ── Run datasets ────────────────────────────────────────────────
