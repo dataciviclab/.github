@@ -172,7 +172,7 @@ jobs:
               CMD="$RUN_BATCH_COMMAND"; WHY="run-batch-command"
             elif grep -qE '^run-batch:' Makefile 2>/dev/null; then
               CMD="make run-batch"; WHY="target run-batch nel Makefile"
-            elif grep -q 'batch.txt' <<< "$RUN_COMMAND"; then
+            elif printf '%s' "$RUN_COMMAND" | grep -q 'batch.txt'; then
               CMD="$RUN_COMMAND"; WHY="run-command consuma batch.txt"
             else
               CMD="$RUN_COMMAND"; WHY=""
