@@ -74,6 +74,17 @@ on:
         description: "Runner label (es. ubuntu-latest, self-hosted)"
         default: "ubuntu-latest"
         type: string
+      cache-paths:
+        description: >-
+          File o directory da conservare tra un run e l'altro (uno per riga).
+          Vuoto = nessuna cache. Serve all'estrazione incrementale: gli script
+          leggono il loro output precedente per estrarre solo le novità.
+        default: ""
+        type: string
+      cache-key:
+        description: "Prefisso della chiave di cache (obbligatorio se cache-paths è impostato)"
+        default: ""
+        type: string
     secrets:
       GCP_SA_KEY:
         required: false
@@ -104,6 +115,19 @@ jobs:
         with:
           install-extras: ${{ inputs.install-extras }}
           extra-packages: ${{ inputs.python-extra-packages }}
+
+      # ── Cache tra run (estrazione incrementale) ─────────────────────
+      # actions/cache ripristina qui e salva nel post-step: quindi il file
+      # c'è prima del run e viene aggiornato dopo, anche se il run fallisce
+      # (i post-step girano salvo cancellazione).
+      - name: Restore cache
+        if: inputs.cache-paths != ''
+        uses: actions/cache@v4
+        with:
+          path: ${{ inputs.cache-paths }}
+          key: ${{ inputs.cache-key }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ inputs.cache-key }}-
 
       # ── Extra env vars (opzionale) ──────────────────────────────────
       - name: Set extra env vars
