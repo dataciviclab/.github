@@ -4,9 +4,10 @@
 #   1. checkout + python-setup
 #   2. pre-run (opzionale: codelists, bootstrap)
 #   3. detect (opzionale: solo dataset cambiati)
-#   4. run (make target passato come input)
-#   5. GCS auth (WIF) + sync (clean + mart)
-#   6. registry → PR draft
+#   4. GCS auth + restore stato (baseline incrementale dal data plane)
+#   5. run (make target passato come input)
+#   6. publish stato + sync (clean + mart)
+#   7. registry → PR draft
 #
 # Il repo chiama con i propri input:
 #   - run-command: comando da eseguire (es. "make run-all" o "toolkit run --batch batch.txt")
@@ -74,6 +75,13 @@ on:
         description: "Runner label (es. ubuntu-latest, self-hosted)"
         default: "ubuntu-latest"
         type: string
+      clean:
+        description: >-
+          Se true (default) il checkout pulisce i file non tracciati. Su runner
+          self-hosted con disco persistente serve false: le baseline gitignored
+          (parquet/cache di estrazione) devono sopravvivere tra i run.
+        default: "true"
+        type: string
       cache-paths:
         description: >-
           File o directory da conservare tra un run e l'altro (uno per riga).
@@ -83,6 +91,20 @@ on:
         type: string
       cache-key:
         description: "Prefisso della chiave di cache (obbligatorio se cache-paths è impostato)"
+        default: ""
+        type: string
+      state-paths:
+        description: >-
+          File/glob da persistere tra un run e l'altro nel data plane (uno per
+          riga, es. out/data/raw/<slug>/*/<file>.csv). Serve alla baseline
+          dell'estrazione incrementale: senza, il run resta full. Vuoto =
+          nessuno stato.
+        default: ""
+        type: string
+      state-uri:
+        description: >-
+          URI GCS dove conservare lo stato (es.
+          gs://dataciviclab-clean/<repo>/_state). Vuoto = nessuno stato.
         default: ""
         type: string
     secrets:
@@ -110,6 +132,7 @@ jobs:
         with:
           ref: ${{ inputs.checkout-ref || github.ref }}
           fetch-depth: 0
+          clean: ${{ inputs.clean != 'false' }}
 
       - uses: dataciviclab/.github/actions/python-setup@main
         with:
@@ -213,6 +236,33 @@ jobs:
             echo "🔧 Full mode: $RUN_COMMAND"
           fi
 
+      # ── GCS auth (prima del run: serve a ripristinare lo stato) ─────
+      # Le credenziali restano valide per il resto del job (sync/registry).
+      - name: GCP Auth (for GCS)
+        if: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        if: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
+        uses: google-github-actions/setup-gcloud@v3
+
+      # ── Restore stato (baseline incrementale dal data plane) ────────
+      # La baseline dell'estrazione incrementale vive in GCS, non sul disco
+      # effimero del runner. Senza, il run resta full (corretto ma lento).
+      - name: Restore state
+        if: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.state-uri != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
+        run: |
+          mkdir -p /tmp/dcl-state
+          if gsutil -q cp "${{ inputs.state-uri }}/state.tgz" /tmp/dcl-state/state.tgz 2>/dev/null; then
+            tar xzf /tmp/dcl-state/state.tgz -C .
+            echo "✅ stato ripristinato da ${{ inputs.state-uri }}"
+          else
+            echo "nessuno stato precedente — run full"
+          fi
+
       # ── Run datasets ────────────────────────────────────────────────
       - name: Run datasets
         if: inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true'
@@ -223,20 +273,27 @@ jobs:
         if: inputs.verify-command != ''
         run: ${{ inputs.verify-command }}
 
-      # ── GCS auth + sync ─────────────────────────────────────────────
-      # `!cancelled()`: se un dataset fallisce il job si ferma qui, ma quello
-      # che il run ha già prodotto va comunque caricato — altrimenti un
-      # timeout sull'ultimo dataset butta via un'ora di lavoro.
-      - name: GCP Auth (for GCS push)
-        if: ${{ !cancelled() && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
-        uses: google-github-actions/auth@v3
-        with:
-          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
-
-      - name: Set up gcloud
-        if: ${{ !cancelled() && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
-        uses: google-github-actions/setup-gcloud@v3
+      # ── Publish stato (baseline per il prossimo run) ────────────────
+      # `!cancelled()`: pubblica anche se un dataset fallisce — lo stato
+      # prodotto finora non va perso.
+      - name: Publish state
+        if: ${{ !cancelled() && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.state-uri != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
+        run: |
+          mkdir -p /tmp/dcl-state
+          : > /tmp/dcl-state/list.txt
+          while IFS= read -r pat; do
+            [ -n "$pat" ] || continue
+            for f in $pat; do
+              [ -e "$f" ] && echo "$f" >> /tmp/dcl-state/list.txt
+            done
+          done <<< "${{ inputs.state-paths }}"
+          if [ ! -s /tmp/dcl-state/list.txt ]; then
+            echo "nessun file di stato da pubblicare"
+            exit 0
+          fi
+          tar czf /tmp/dcl-state/state.tgz -T /tmp/dcl-state/list.txt
+          gsutil -q cp /tmp/dcl-state/state.tgz "${{ inputs.state-uri }}/state.tgz"
+          echo "✅ stato pubblicato: $(wc -l < /tmp/dcl-state/list.txt) file, $(du -h /tmp/dcl-state/state.tgz | cut -f1)"
 
       # Sync flat: rsync intera dir out/ al prefisso repo
       - name: Sync to GCS (flat)
