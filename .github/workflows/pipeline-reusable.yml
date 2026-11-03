@@ -74,6 +74,13 @@ on:
         description: "Runner label (es. ubuntu-latest, self-hosted)"
         default: "ubuntu-latest"
         type: string
+      clean:
+        description: >-
+          Se true (default) il checkout pulisce i file non tracciati. Su runner
+          self-hosted con disco persistente serve false: le baseline gitignored
+          (parquet/cache di estrazione) devono sopravvivere tra i run.
+        default: "true"
+        type: string
       cache-paths:
         description: >-
           File o directory da conservare tra un run e l'altro (uno per riga).
@@ -110,6 +117,7 @@ jobs:
         with:
           ref: ${{ inputs.checkout-ref || github.ref }}
           fetch-depth: 0
+          clean: ${{ inputs.clean != 'false' }}
 
       - uses: dataciviclab/.github/actions/python-setup@main
         with:
