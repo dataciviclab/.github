@@ -74,6 +74,17 @@ on:
         description: "Runner label (es. ubuntu-latest, self-hosted)"
         default: "ubuntu-latest"
         type: string
+      cache-paths:
+        description: >-
+          File o directory da conservare tra un run e l'altro (uno per riga).
+          Vuoto = nessuna cache. Serve all'estrazione incrementale: gli script
+          leggono il loro output precedente per estrarre solo le novità.
+        default: ""
+        type: string
+      cache-key:
+        description: "Prefisso della chiave di cache (obbligatorio se cache-paths è impostato)"
+        default: ""
+        type: string
     secrets:
       GCP_SA_KEY:
         required: false
@@ -104,6 +115,19 @@ jobs:
         with:
           install-extras: ${{ inputs.install-extras }}
           extra-packages: ${{ inputs.python-extra-packages }}
+
+      # ── Cache tra run (estrazione incrementale) ─────────────────────
+      # actions/cache ripristina qui e salva nel post-step: quindi il file
+      # c'è prima del run e viene aggiornato dopo, anche se il run fallisce
+      # (i post-step girano salvo cancellazione).
+      - name: Restore cache
+        if: inputs.cache-paths != ''
+        uses: actions/cache@v4
+        with:
+          path: ${{ inputs.cache-paths }}
+          key: ${{ inputs.cache-key }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ inputs.cache-key }}-
 
       # ── Extra env vars (opzionale) ──────────────────────────────────
       - name: Set extra env vars
@@ -200,20 +224,23 @@ jobs:
         run: ${{ inputs.verify-command }}
 
       # ── GCS auth + sync ─────────────────────────────────────────────
+      # `!cancelled()`: se un dataset fallisce il job si ferma qui, ma quello
+      # che il run ha già prodotto va comunque caricato — altrimenti un
+      # timeout sull'ultimo dataset butta via un'ora di lavoro.
       - name: GCP Auth (for GCS push)
-        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true')
+        if: ${{ !cancelled() && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
 
       - name: Set up gcloud
-        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true')
+        if: ${{ !cancelled() && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         uses: google-github-actions/setup-gcloud@v3
 
       # Sync flat: rsync intera dir out/ al prefisso repo
       - name: Sync to GCS (flat)
-        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'flat' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true')
+        if: ${{ !cancelled() && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'flat' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         run: |
           gsutil -m rsync -r out/data/mart/ gs://dataciviclab-mart/${{ inputs.repo-slug }}/
           gsutil -m rsync -r out/data/clean/ gs://dataciviclab-clean/${{ inputs.repo-slug }}/
@@ -221,7 +248,7 @@ jobs:
 
       # Sync per-dataset: per slug, tutti gli anni
       - name: Sync to GCS (per-dataset)
-        if: env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'per-dataset' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true')
+        if: ${{ !cancelled() && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'per-dataset' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         run: |
           for slug_dir in out/data/clean/*/; do
             [ -d "$slug_dir" ] || continue
@@ -246,7 +273,7 @@ jobs:
 
       # ── Registry → draft PR ──────────────────────────────────────────
       - name: Registry update PR
-        if: inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true'
+        if: ${{ !cancelled() && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         uses: dataciviclab/.github/actions/registry-update-pr@main
         with:
           prefix: ${{ inputs.repo-slug }}
