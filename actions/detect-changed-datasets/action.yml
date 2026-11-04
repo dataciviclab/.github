@@ -10,8 +10,8 @@ inputs:
   exclude:
     description: "Regex per escludere file"
     default: "\\.(md|ipynb|png|jpg|jpeg|gif|svg)$|/(out|__pycache__)/"
-  slug-input:
-    description: "Slug specifico da processare (workflow_dispatch)"
+  datasets:
+    description: "Uno o più slug separati da virgola (o path del dataset.yml). Vuoto = nessuno. Vedi ADR-002."
     default: ""
 
 outputs:
@@ -34,15 +34,28 @@ runs:
       env:
         PATHS: ${{ inputs.paths }}
         EXCLUDE: ${{ inputs.exclude }}
-        SLUG_INPUT: ${{ inputs.slug-input }}
+        DATASETS: ${{ inputs.datasets }}
       run: |
         : > changed.txt
 
-        if [ -n "$SLUG_INPUT" ]; then
-          for base in $PATHS; do
-            if [ -f "$base/$SLUG_INPUT/dataset.yml" ]; then
-              echo "$base/$SLUG_INPUT" >> changed.txt
+        if [ -n "$DATASETS" ]; then
+          # ADR-002: uno o più slug separati da virgola (spazi tollerati).
+          # Ogni voce può essere lo slug della cartella (es. mase-gas-import)
+          # oppure il path del config (es. datasets/laureati/dataset.yml).
+          #
+          # Più dataset in un solo run servono perché il registry si costruisce
+          # dagli artifact locali del run: un dispatch per dataset dà N registry
+          # PR sullo stesso branch, che si sovrascrivono.
+          for item in $(echo "$DATASETS" | tr ',' ' '); do
+            if [ -f "$item" ] && [ "$(basename "$item")" = "dataset.yml" ]; then
+              echo "$(dirname "$item")" >> changed.txt
+              continue
             fi
+            for base in $PATHS; do
+              if [ -f "$base/$item/dataset.yml" ]; then
+                echo "$base/$item" >> changed.txt
+              fi
+            done
           done
         else
           PR_NUMBER="${{ github.event.pull_request.number }}"
@@ -67,8 +80,8 @@ runs:
         fi
 
         if [ -s changed.txt ]; then
-          DIRS=$(cat changed.txt | tr '\n' ' ' | sed 's/ $//')
-          COUNT=$(wc -l < changed.txt | tr -d ' ')
+          DIRS=$(sort -u changed.txt | tr '\n' ' ' | sed 's/ $//')
+          COUNT=$(sort -u changed.txt | wc -l | tr -d ' ')
           echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
           echo "count=$COUNT" >> "$GITHUB_OUTPUT"
           echo "found=true" >> "$GITHUB_OUTPUT"
