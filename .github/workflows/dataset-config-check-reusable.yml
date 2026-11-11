@@ -33,8 +33,11 @@ on:
         default: ""
       configs:
         description: >
-          Lista di path dataset.yml da validare (uno per riga, newline-separated).
-          Se fornita, controlla SOLO questi path (ignora globs).
+          Lista di config da validare (uno per riga, newline-separated, oppure
+          separati da spazio). Ogni voce può essere il path di un dataset.yml
+          oppure la directory del dataset (formato di detect-changed-datasets):
+          le directory vengono risolte in <dir>/dataset.yml.
+          Se fornita, controlla SOLO queste voci (ignora globs).
           Vuota = controlla tutti i dataset.yml nei globs (comportamento default).
         required: false
         type: string
@@ -68,6 +71,18 @@ jobs:
           if [ -n "$CONFIGS" ]; then
             echo "→ Modalità: configs specifici"
             echo "$CONFIGS" | tr " " "\n" > /tmp/configs.txt
+            # Accetta anche la directory del dataset (output di
+            # detect-changed-datasets): la risolve in <dir>/dataset.yml.
+            : > /tmp/configs.norm.txt
+            while IFS= read -r entry; do
+              [ -z "$entry" ] && continue
+              if [ -d "$entry" ] && [ -f "$entry/dataset.yml" ]; then
+                echo "$entry/dataset.yml" >> /tmp/configs.norm.txt
+              else
+                echo "$entry" >> /tmp/configs.norm.txt
+              fi
+            done < /tmp/configs.txt
+            mv /tmp/configs.norm.txt /tmp/configs.txt
           else
             echo "→ Modalità: tutti i dataset nei globs"
             : > /tmp/configs.txt
