@@ -74,7 +74,19 @@ runs:
         git checkout -B "$BRANCH"
         git add ${{ inputs.registry-dir }}
         git commit -m "chore(post-merge): aggiorna registry ($PR_NUMBER)" || exit 0
-        git push --force-with-lease -u origin "$BRANCH"
+        # Retry sul push: due corsie (pipeline GitHub e VM) condividono lo stesso
+        # branch del registry. Un fallimento transitorio non deve diventare un
+        # run rosso indistinguibile da un errore di dati.
+        pushed=0
+        for attempt in 1 2 3; do
+          if git push --force-with-lease -u origin "$BRANCH"; then pushed=1; break; fi
+          echo "::warning title=registry push::tentativo $attempt/3 fallito"
+          sleep $((attempt * 5))
+        done
+        if [ "$pushed" != "1" ]; then
+          echo "::error title=registry push::push di $BRANCH fallito dopo 3 tentativi — probabile conflitto con un'altra corsia che ha pushato lo stesso branch. I dati su GCS sono sincronizzati; il registry non è aggiornato da questo run."
+          exit 1
+        fi
         EXISTING_PR=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number // empty')
         if [ -n "$EXISTING_PR" ]; then
           gh pr edit "$EXISTING_PR" \
