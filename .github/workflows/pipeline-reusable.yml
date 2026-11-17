@@ -42,6 +42,14 @@ on:
         description: "flat (rsync intera dir out/) o per-dataset (per slug/year)"
         default: "flat"
         type: string
+      sync-prefix:
+        description: >-
+          Prefisso su GCS e nel registry. "auto" (default) = repo-slug.
+          Stringa vuota = radice del bucket: per i repo che pubblicano senza
+          prefisso di repo (es. dataset-incubator, i cui candidate stanno in
+          gs://dataciviclab-{clean,mart}/<slug>/<anno>/).
+        default: "auto"
+        type: string
       pre-run-command:
         description: "Comando pre-run opzionale (es. detect, codelists, bootstrap)"
         default: ""
@@ -246,25 +254,46 @@ jobs:
         if: ${{ !cancelled() && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         uses: google-github-actions/setup-gcloud@v3
 
-      # Sync flat: rsync intera dir out/ al prefisso repo
+      # Prefisso GCS: unica fonte per il sync e per il registry, così i due non
+      # possono divergere. "auto" = repo-slug; "" = radice del bucket.
+      - name: Resolve GCS prefix
+        id: gcs-prefix
+        env:
+          INPUT_PREFIX: ${{ inputs.sync-prefix }}
+          REPO_SLUG: ${{ inputs.repo-slug }}
+        run: |
+          prefix="$INPUT_PREFIX"
+          if [ "$prefix" = "auto" ]; then prefix="$REPO_SLUG"; fi
+          echo "value=$prefix" >> "$GITHUB_OUTPUT"
+          echo "📁 prefisso GCS: ${prefix:-<radice>}"
+
+      # Sync flat: rsync intera dir out/ al prefisso
       - name: Sync to GCS (flat)
         if: ${{ !cancelled() && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'flat' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
+        env:
+          PREFIX: ${{ steps.gcs-prefix.outputs.value }}
         run: |
-          gsutil -m rsync -r out/data/mart/ gs://dataciviclab-mart/${{ inputs.repo-slug }}/
-          gsutil -m rsync -r out/data/clean/ gs://dataciviclab-clean/${{ inputs.repo-slug }}/
-          echo "✅ Synced to gs://dataciviclab-mart|clean/${{ inputs.repo-slug }}/"
+          seg="${PREFIX:+$PREFIX/}"
+          gsutil -m rsync -r out/data/mart/ "gs://dataciviclab-mart/${seg}"
+          gsutil -m rsync -r out/data/clean/ "gs://dataciviclab-clean/${seg}"
+          echo "✅ Synced to gs://dataciviclab-mart|clean/${seg}"
 
-      # Sync per-dataset: per slug, tutti gli anni
+      # Sync per-dataset: per slug, tutti gli anni + file a livello dataset
+      # (tabelle multi-anno: mart.tables[].years produce <slug>/<tabella>.parquet,
+      # non una cartella anno).
       - name: Sync to GCS (per-dataset)
         if: ${{ !cancelled() && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'per-dataset' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
+        env:
+          PREFIX: ${{ steps.gcs-prefix.outputs.value }}
         run: |
+          seg="${PREFIX:+$PREFIX/}"
           for slug_dir in out/data/clean/*/; do
             [ -d "$slug_dir" ] || continue
             slug=$(basename "$slug_dir")
             for year_dir in "$slug_dir"*/; do
               [ -d "$year_dir" ] || continue
               year=$(basename "$year_dir")
-              gsutil -m rsync -r "$year_dir" "gs://dataciviclab-clean/${{ inputs.repo-slug }}/$slug/$year/"
+              gsutil -m rsync -r "$year_dir" "gs://dataciviclab-clean/${seg}$slug/$year/"
             done
             echo "✅ $slug clean synced"
           done
@@ -274,7 +303,11 @@ jobs:
             for year_dir in "$slug_dir"*/; do
               [ -d "$year_dir" ] || continue
               year=$(basename "$year_dir")
-              gsutil -m rsync -r "$year_dir" "gs://dataciviclab-mart/${{ inputs.repo-slug }}/$slug/$year/"
+              gsutil -m rsync -r "$year_dir" "gs://dataciviclab-mart/${seg}$slug/$year/"
+            done
+            for f in "$slug_dir"*.parquet; do
+              [ -f "$f" ] || continue
+              gsutil -m cp "$f" "gs://dataciviclab-mart/${seg}$slug/"
             done
             echo "✅ $slug mart synced"
           done
@@ -284,6 +317,6 @@ jobs:
         if: ${{ !cancelled() && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         uses: dataciviclab/.github/actions/registry-update-pr@main
         with:
-          prefix: ${{ inputs.repo-slug }}
+          prefix: ${{ steps.gcs-prefix.outputs.value }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
