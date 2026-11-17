@@ -239,9 +239,18 @@ jobs:
         run: ${{ steps.run-cmd.outputs.cmd }}
 
       # ── Verify (opzionale) ──────────────────────────────────────────
+      # Solo su run completo. Due fallimenti diversi, due semantiche:
+      #   - run caduto  -> il verify è saltato e auth/sync salvano quello che
+      #                    c'è (altrimenti un timeout sull'ultimo dataset butta
+      #                    via un'ora di lavoro e i dataset già prodotti);
+      #   - dato sbagliato -> il verify gira su un out/ completo, fallisce e
+      #                    blocca auth, sync e registry.
+      # Senza `success()` il verify girerebbe anche su un run rotto, leggendo un
+      # out/ parziale: fallirebbe quasi sempre e trasformerebbe il salvataggio
+      # del salvabile in «non pubblicare niente».
       - name: Verify output
         id: verify
-        if: inputs.verify-command != ''
+        if: ${{ inputs.verify-command != '' && success() }}
         run: ${{ inputs.verify-command }}
 
       # ── GCS auth + sync ─────────────────────────────────────────────
@@ -251,8 +260,10 @@ jobs:
       # `steps.verify.outcome != 'failure'`: invece un verify fallito BLOCCA
       # auth, sync e registry. Senza questo un `verify-command` che controlla
       # la qualità del dato sarebbe decorativo: il job diventa rosso e pubblica
-      # lo stesso. Con verify non configurato l'outcome è 'skipped' e la
-      # condizione passa.
+      # lo stesso. Il verify gira solo su run completo (`success()`), quindi
+      # `outcome != 'failure'` vuol dire «run ok e dato ok»; su un run rotto è
+      # `skipped` e il salvataggio del salvabile resta. Con verify non
+      # configurato è `skipped` e la condizione passa.
       - name: GCP Auth (for GCS push)
         if: ${{ !cancelled() && steps.verify.outcome != 'failure' && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         uses: google-github-actions/auth@v3
