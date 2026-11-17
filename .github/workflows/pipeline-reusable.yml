@@ -10,7 +10,11 @@
 #
 # Il repo chiama con i propri input:
 #   - run-command: comando da eseguire (es. "make run-all" o "toolkit run --batch batch.txt")
-#   - repo-slug: prefisso GCS e registry
+#   - repo-slug: slug del repo nel catalogo
+#   - sync-prefix: prefisso GCS e registry. "auto" (default) = repo-slug;
+#       stringa vuota = radice del bucket (repo che pubblicano senza prefisso,
+#       es. dataset-incubator). Se valorizzato, il path su GCS e quello nel
+#       catalogo seguono questo, non repo-slug.
 #   - detect-paths: directory da monitorare (es. "datasets compose"). Vuoto = run all
 #   - run-batch-command: comando per il batch selettivo su PR (opzionale)
 #
@@ -264,6 +268,16 @@ jobs:
         run: |
           prefix="$INPUT_PREFIX"
           if [ "$prefix" = "auto" ]; then prefix="$REPO_SLUG"; fi
+          case "$prefix" in
+            *://*)
+              echo "::error::sync-prefix='$prefix' sembra una URI: usa solo il prefisso (es. 'eurostat'), non 'gs://bucket/…'."
+              exit 1
+              ;;
+          esac
+          # 'foo/', '/foo' e '/foo/' devono produrre lo stesso prefisso: se la
+          # barra resta, il path su GCS e quello nel catalogo sono coerenti tra
+          # loro ma sbagliati, e nessuno se ne accorge.
+          prefix=$(printf '%s' "$prefix" | sed 's:^/::; s:/*$::')
           echo "value=$prefix" >> "$GITHUB_OUTPUT"
           echo "📁 prefisso GCS: ${prefix:-<radice>}"
 
@@ -305,10 +319,9 @@ jobs:
               year=$(basename "$year_dir")
               gsutil -m rsync -r "$year_dir" "gs://dataciviclab-mart/${seg}$slug/$year/"
             done
-            for f in "$slug_dir"*.parquet; do
-              [ -f "$f" ] || continue
-              gsutil -m cp "$f" "gs://dataciviclab-mart/${seg}$slug/"
-            done
+            if compgen -G "$slug_dir*.parquet" > /dev/null; then
+              gsutil -m cp "$slug_dir"*.parquet "gs://dataciviclab-mart/${seg}$slug/"
+            fi
             echo "✅ $slug mart synced"
           done
 
