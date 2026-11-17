@@ -240,6 +240,7 @@ jobs:
 
       # ── Verify (opzionale) ──────────────────────────────────────────
       - name: Verify output
+        id: verify
         if: inputs.verify-command != ''
         run: ${{ inputs.verify-command }}
 
@@ -247,15 +248,20 @@ jobs:
       # `!cancelled()`: se un dataset fallisce il job si ferma qui, ma quello
       # che il run ha già prodotto va comunque caricato — altrimenti un
       # timeout sull'ultimo dataset butta via un'ora di lavoro.
+      # `steps.verify.outcome != 'failure'`: invece un verify fallito BLOCCA
+      # auth, sync e registry. Senza questo un `verify-command` che controlla
+      # la qualità del dato sarebbe decorativo: il job diventa rosso e pubblica
+      # lo stesso. Con verify non configurato l'outcome è 'skipped' e la
+      # condizione passa.
       - name: GCP Auth (for GCS push)
-        if: ${{ !cancelled() && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
+        if: ${{ !cancelled() && steps.verify.outcome != 'failure' && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
 
       - name: Set up gcloud
-        if: ${{ !cancelled() && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
+        if: ${{ !cancelled() && steps.verify.outcome != 'failure' && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         uses: google-github-actions/setup-gcloud@v3
 
       # Prefisso GCS: unica fonte per il sync e per il registry, così i due non
@@ -283,7 +289,7 @@ jobs:
 
       # Sync flat: rsync intera dir out/ al prefisso
       - name: Sync to GCS (flat)
-        if: ${{ !cancelled() && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'flat' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
+        if: ${{ !cancelled() && steps.verify.outcome != 'failure' && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'flat' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         env:
           PREFIX: ${{ steps.gcs-prefix.outputs.value }}
         run: |
@@ -296,7 +302,7 @@ jobs:
       # (tabelle multi-anno: mart.tables[].years produce <slug>/<tabella>.parquet,
       # non una cartella anno).
       - name: Sync to GCS (per-dataset)
-        if: ${{ !cancelled() && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'per-dataset' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
+        if: ${{ !cancelled() && steps.verify.outcome != 'failure' && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'per-dataset' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         env:
           PREFIX: ${{ steps.gcs-prefix.outputs.value }}
         run: |
@@ -327,7 +333,7 @@ jobs:
 
       # ── Registry → draft PR ──────────────────────────────────────────
       - name: Registry update PR
-        if: ${{ !cancelled() && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
+        if: ${{ !cancelled() && steps.verify.outcome != 'failure' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         uses: dataciviclab/.github/actions/registry-update-pr@main
         with:
           prefix: ${{ steps.gcs-prefix.outputs.value }}
