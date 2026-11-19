@@ -63,6 +63,15 @@ Package org        = IMPLEMENTAZIONE toolkit, lab-connectors: CLI versionati
 3. **Il Makefile non contiene logica**, solo delega a comandi condivisi.
 4. **Locale == CI**: lo stesso comando `make` gira identico in locale e in CI;
    il workflow chiama i target Makefile invece di replicare i comandi.
+5. **Un output consumato da step `!cancelled()` deve essere prodotto da uno
+   step `!cancelled()`.** `!cancelled()` esiste per «salva il salvabile» dopo
+   un run fallito: uno step senza `if:` eredita invece `success()`, viene
+   saltato e lascia il proprio output vuoto. Il consumatore riceve `""` e agisce
+   su un default sbagliato. Due occorrenze: `verify` (#47) e `gcs-prefix`
+   (#48 — scrisse su GCS alla radice del bucket invece che sotto il prefisso
+   del repo). Un `exit 1` nel produttore **non** basta: non ferma i consumatori
+   con `!cancelled()`, serve `steps.<id>.outcome != 'failure'` sulle loro
+   condizioni.
 
 ### 3. Confine semantico
 

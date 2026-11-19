@@ -295,6 +295,10 @@ jobs:
           if [ "$prefix" = "auto" ]; then prefix="$REPO_SLUG"; fi
           if [ "$INPUT_PREFIX" = "auto" ] && [ -z "$prefix" ]; then
             echo "::error::repo-slug vuoto: impossibile risolvere sync-prefix='auto'. Passa repo-slug o un sync-prefix esplicito."
+            # Nota: `exit 1` da solo NON ferma la scrittura. Gli step con
+            # `!cancelled()` girano lo stesso, quindi il blocco vero è
+            # `steps.gcs-prefix.outcome != 'failure'` sulle condizioni di sync
+            # e registry.
             exit 1
           fi
           case "$prefix" in
@@ -312,7 +316,7 @@ jobs:
 
       # Sync flat: rsync intera dir out/ al prefisso
       - name: Sync to GCS (flat)
-        if: ${{ !cancelled() && steps.verify.outcome != 'failure' && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'flat' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
+        if: ${{ !cancelled() && steps.verify.outcome != 'failure' && steps.gcs-prefix.outcome != 'failure' && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'flat' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         env:
           PREFIX: ${{ steps.gcs-prefix.outputs.value }}
         run: |
@@ -325,7 +329,7 @@ jobs:
       # (tabelle multi-anno: mart.tables[].years produce <slug>/<tabella>.parquet,
       # non una cartella anno).
       - name: Sync to GCS (per-dataset)
-        if: ${{ !cancelled() && steps.verify.outcome != 'failure' && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'per-dataset' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
+        if: ${{ !cancelled() && steps.verify.outcome != 'failure' && steps.gcs-prefix.outcome != 'failure' && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && inputs.sync-pattern == 'per-dataset' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         env:
           PREFIX: ${{ steps.gcs-prefix.outputs.value }}
         run: |
@@ -356,7 +360,7 @@ jobs:
 
       # ── Registry → draft PR ──────────────────────────────────────────
       - name: Registry update PR
-        if: ${{ !cancelled() && steps.verify.outcome != 'failure' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
+        if: ${{ !cancelled() && steps.verify.outcome != 'failure' && steps.gcs-prefix.outcome != 'failure' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         uses: dataciviclab/.github/actions/registry-update-pr@main
         with:
           prefix: ${{ steps.gcs-prefix.outputs.value }}
