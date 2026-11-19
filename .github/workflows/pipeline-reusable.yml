@@ -279,12 +279,24 @@ jobs:
       # possono divergere. "auto" = repo-slug; "" = radice del bucket.
       - name: Resolve GCS prefix
         id: gcs-prefix
+        # DEVE girare anche se il run è fallito: auth, sync e registry hanno
+        # `!cancelled()` apposta («salva il salvabile»), e consumano questo
+        # output. Senza l'`if`, lo step eredita `success()`: su un run fallito
+        # viene saltato, l'output resta vuoto e sync/registry scrivono alla
+        # RADICE del bucket invece che sotto il prefisso del repo.
+        # È successo il 2026-11-19 in open-politica #121: run fallito →
+        # prefisso vuoto → registry riscritto senza `open-politica/`.
+        if: ${{ !cancelled() && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         env:
           INPUT_PREFIX: ${{ inputs.sync-prefix }}
           REPO_SLUG: ${{ inputs.repo-slug }}
         run: |
           prefix="$INPUT_PREFIX"
           if [ "$prefix" = "auto" ]; then prefix="$REPO_SLUG"; fi
+          if [ "$INPUT_PREFIX" = "auto" ] && [ -z "$prefix" ]; then
+            echo "::error::repo-slug vuoto: impossibile risolvere sync-prefix='auto'. Passa repo-slug o un sync-prefix esplicito."
+            exit 1
+          fi
           case "$prefix" in
             *://*)
               echo "::error::sync-prefix='$prefix' sembra una URI: usa solo il prefisso (es. 'eurostat'), non 'gs://bucket/…'."
