@@ -2,6 +2,11 @@ name: 'Registry Update PR (org-level)'
 description: |
   Build registry → diff → draft PR, come STEP nel job della pipeline.
 
+  Salta sui run selettivi (`pull_request` post-merge, dispatch con dataset
+  scelti): `partitions` si deriva dai parquet locali del run e sarebbe una
+  fotografia parziale. Il registry si aggiorna sui run completi
+  (schedule/dispatch senza selezione).
+
   DEVE girare nello stesso job del run (con `out/` popolato): il registry
   deriva le entry dai parquet locali (`toolkit registry build`), quindi in un
   job separato su runner fresco produrrebbe un catalogo vuoto.
@@ -36,7 +41,18 @@ inputs:
 runs:
   using: "composite"
   steps:
+    # Il registry deriva `partitions` dai parquet locali del run: su un run
+    # selettivo (post-merge PR, dispatch con `datasets`) l'out/ contiene solo i
+    # dataset eseguiti e il registry risultante è una fotografia parziale.
+    # Si aggiorna solo sui run completi (schedule/dispatch senza selezione).
+    - name: Skip on selective runs
+      if: github.event_name == 'pull_request'
+      shell: bash
+      run: |
+        echo "::notice::registry aggiornato solo su run completi (schedule/dispatch), non sui run post-merge selettivi"
+
     - name: Build registry
+      if: github.event_name != 'pull_request'
       shell: bash
       run: |
         command -v toolkit >/dev/null 2>&1 || {
@@ -51,6 +67,7 @@ runs:
 
     - name: Check registry diff
       id: diff
+      if: github.event_name != 'pull_request'
       shell: bash
       run: |
         # registry/ è untracked su main (generato dal builder) —
@@ -62,7 +79,7 @@ runs:
         fi
 
     - name: Create draft registry PR
-      if: steps.diff.outputs.changed == 'true'
+      if: github.event_name != 'pull_request' && steps.diff.outputs.changed == 'true'
       shell: bash
       env:
         GH_TOKEN: ${{ env.GH_TOKEN }}
