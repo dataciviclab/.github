@@ -66,9 +66,10 @@ on:
         description: >-
           Profondità della storia nel checkout (default "0" = tutta la storia,
           comportamento storico). Il workflow non legge la storia: il detect
-          usa l'API GitHub e il registry `git status`, quindi su un repo con
-          storia pesante conviene "1" (italia-corpus: .git 1,7 GiB, checkout
-          169-207s -> ~60s).
+          risolve i file via API GitHub, il registry ricrea e pusha un branch
+          proprio (con lease esplicita, quindi non deve conoscere il ref
+          remoto). Su un repo con storia pesante conviene "1" (italia-corpus:
+          .git 1,7 GiB, checkout 169-207s -> ~60s).
         default: "0"
         type: string
       install-extras:
