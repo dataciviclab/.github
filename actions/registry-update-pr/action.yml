@@ -74,7 +74,21 @@ runs:
         git checkout -B "$BRANCH"
         git add ${{ inputs.registry-dir }}
         git commit -m "chore(post-merge): aggiorna registry ($PR_NUMBER)" || exit 0
-        git push --force-with-lease -u origin "$BRANCH"
+        # Il branch viene ricreato a ogni run (`checkout -B` da HEAD + un
+        # commit), quindi il push è un force. La lease implicita di
+        # `--force-with-lease` deve confrontare il ref remoto, che in un
+        # checkout shallow (`checkout-fetch-depth: 1`) non esiste: git rifiuta
+        # con `! [rejected] ... (stale info)` e dal secondo run il registry non
+        # si aggiorna più. Riprodotto con un clone `--depth 1` e un branch
+        # remoto esistente: exit 1 senza lease, exit 0 con quella esplicita.
+        # La lease esplicita rende il passo indipendente dalla profondità.
+        REMOTE_SHA=$(git ls-remote origin "refs/heads/$BRANCH" | cut -f1)
+        if [ -n "$REMOTE_SHA" ]; then
+          git push --force-with-lease="$BRANCH:$REMOTE_SHA" -u origin "$BRANCH"
+        else
+          # branch nuovo: niente da sovrascrivere, la lease non serve
+          git push -u origin "$BRANCH"
+        fi
         EXISTING_PR=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number // empty')
         if [ -n "$EXISTING_PR" ]; then
           gh pr edit "$EXISTING_PR" \
