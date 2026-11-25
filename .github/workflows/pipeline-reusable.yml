@@ -245,6 +245,7 @@ jobs:
 
       # ── Run datasets ────────────────────────────────────────────────
       - name: Run datasets
+        id: run
         if: inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true'
         run: ${{ steps.run-cmd.outputs.cmd }}
 
@@ -370,7 +371,11 @@ jobs:
 
       # ── Registry → draft PR ──────────────────────────────────────────
       - name: Registry update PR
-        if: ${{ !cancelled() && steps.verify.outcome != 'failure' && steps.gcs-prefix.outcome != 'failure' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
+        # Il registry si aggiorna solo se il run è andato a buon fine: con un
+        # run fallito l'`out/` è parziale e `partitions` sarebbe una fotografia
+        # incompleta. `verify` da sola non basta: quando il run fallisce è
+        # `skipped`, non `failure` (bug visto su bilancio-pubblico 2026-11-25).
+        if: ${{ !cancelled() && steps.run.outcome == 'success' && steps.verify.outcome != 'failure' && steps.gcs-prefix.outcome != 'failure' && (inputs.detect-paths == '' || github.event_name != 'pull_request' || steps.detect.outputs.found == 'true') }}
         uses: dataciviclab/.github/actions/registry-update-pr@main
         with:
           prefix: ${{ steps.gcs-prefix.outputs.value }}
