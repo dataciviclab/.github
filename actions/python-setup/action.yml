@@ -89,14 +89,23 @@ runs:
     - name: Install extra requirements files
       if: inputs.extra-requirements != ''
       shell: bash
+      env:
+        RUNNER_ENV: ${{ runner.environment }}
       run: |
+        FORCE=""
+        if [ "$RUNNER_ENV" = "self-hosted" ]; then FORCE="--force-reinstall"; fi
         for req in ${{ inputs.extra-requirements }}; do
           if [ -f "$req" ]; then
-            python -m pip install -r "$req"
+            python -m pip install $FORCE -r "$req"
           fi
         done
 
     - name: Install extra packages
       if: inputs.extra-packages != ''
       shell: bash
-      run: python -m pip install ${{ inputs.extra-packages }}
+      env:
+        RUNNER_ENV: ${{ runner.environment }}
+      run: |
+        FORCE=""
+        if [ "$RUNNER_ENV" = "self-hosted" ]; then FORCE="--force-reinstall"; fi
+        python -m pip install $FORCE ${{ inputs.extra-packages }}
