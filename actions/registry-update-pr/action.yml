@@ -2,12 +2,18 @@ name: 'Registry Update PR (org-level)'
 description: |
   Build registry → diff → draft PR, come STEP nel job della pipeline.
 
-  Salta sui run selettivi: `partitions` si deriva dai parquet locali del run
-  e sarebbe una fotografia parziale. Due guardie:
-  - `pull_request` (post-merge) → salta subito;
-  - `toolkit registry build --require-complete` → exit 3 se un dataset con
-    `clean:` non ha parquet nel run (copre anche i dispatch con dataset
-    scelti, senza dipendere dal nome dell'input).
+  Gira su OGNI run che produce dati (post-merge compreso): il registry deve
+  riflettere il dataset appena pubblicato. La sicurezza non è "tutto o
+  niente" ma per-dataset:
+  - i dataset non eseguiti conservano la loro entry (location/partitions dal
+    registry committato — `_slim_dataset_entry`);
+  - i dataset eseguiti vengono ricostruiti per intero (tutte le loro years);
+  - `partitions` si fonde con l'existing (union, il locale vince): una run
+    selettiva non può restringere le partizioni già dichiarate;
+  - il builder non trasforma mai una glob esistente in un path puntuale.
+
+  `toolkit registry build --require-complete` esiste per i run manuali/locali
+  (es. wave con out/ parziale), NON per la CI: qui salterebbe ogni post-merge.
 
   DEVE girare nello stesso job del run (con `out/` popolato): il registry
   deriva le entry dai parquet locali (`toolkit registry build`), quindi in un
@@ -43,19 +49,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # Il registry deriva `partitions` dai parquet locali del run: su un run
-    # selettivo (post-merge PR, dispatch con `datasets`) l'out/ contiene solo i
-    # dataset eseguiti e il registry risultante è una fotografia parziale.
-    # Si aggiorna solo sui run completi (schedule/dispatch senza selezione).
-    - name: Skip on selective runs
-      if: github.event_name == 'pull_request'
-      shell: bash
-      run: |
-        echo "::notice::registry aggiornato solo su run completi (schedule/dispatch), non sui run post-merge selettivi"
-
     - name: Build registry
-      id: build
-      if: github.event_name != 'pull_request'
       shell: bash
       run: |
         command -v toolkit >/dev/null 2>&1 || {
@@ -66,20 +60,10 @@ runs:
         CMD="toolkit registry build"
         if [ -n "${{ inputs.prefix }}" ]; then CMD="$CMD --prefix ${{ inputs.prefix }}"; fi
         if [ "${{ inputs.flat }}" = "true" ]; then CMD="$CMD --flat"; fi
-        set +e
-        $CMD --write --require-complete
-        rc=$?
-        set -e
-        if [ "$rc" = "3" ]; then
-          echo "::notice::run incompleta: registry non aggiornato (serve un run completo)"
-          echo "skip=true" >> "$GITHUB_OUTPUT"
-          exit 0
-        fi
-        exit "$rc"
+        $CMD --write
 
     - name: Check registry diff
       id: diff
-      if: github.event_name != 'pull_request' && steps.build.outputs.skip != 'true'
       shell: bash
       run: |
         # registry/ è untracked su main (generato dal builder) —
@@ -91,10 +75,7 @@ runs:
         fi
 
     - name: Create draft registry PR
-      if: >-
-        github.event_name != 'pull_request'
-        && steps.build.outputs.skip != 'true'
-        && steps.diff.outputs.changed == 'true'
+      if: steps.diff.outputs.changed == 'true'
       shell: bash
       env:
         GH_TOKEN: ${{ env.GH_TOKEN }}
