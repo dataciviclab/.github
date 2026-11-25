@@ -7,6 +7,12 @@ description: |
   Il checkout deve essere fatto PRIMA di chiamare questa action
   (le composite action locali non possono contenere actions/checkout).
 
+  Self-hosted: pip considera soddisfatte le dipendenze git senza ref
+  (`pkg @ git+...`) e non le riaggiorna tra una run e l'altra: su un runner
+  persistente il toolkit resta alla versione installata la prima volta (visto
+  su rna-aiuti-stato: registry v1 scritto con il CLI vecchio). Per questo su
+  `runner.environment == 'self-hosted'` l'install usa `--force-reinstall`.
+
   Install order:
   1. pyproject.toml → pip install -e ".[extras]" (se esiste)
   2. requirements.txt → pip install -r (legacy, se pyproject non esiste)
@@ -55,15 +61,26 @@ runs:
 
     - name: Install core dependencies
       shell: bash
+      env:
+        RUNNER_ENV: ${{ runner.environment }}
       run: |
         EXTRAS="${{ inputs.install-extras }}"
+        # Runner persistente: le URL git senza ref (`@ git+https://…`) restano
+        # "già soddisfatte" e non vengono riaggiornate. Su self-hosted si forza
+        # la ri-risoluzione, altrimenti il toolkit resta alla versione del primo
+        # setup (es. registry v1 scritto dal CLI vecchio).
+        FORCE=""
+        if [ "$RUNNER_ENV" = "self-hosted" ]; then
+          FORCE="--force-reinstall"
+          echo "::notice::runner self-hosted: force-reinstall delle dipendenze (URL git senza ref)"
+        fi
         if [ -f pyproject.toml ]; then
-          echo "::group::pip install -e .[$EXTRAS]"
-          python -m pip install -e ".[$EXTRAS]"
+          echo "::group::pip install $FORCE -e .[$EXTRAS]"
+          python -m pip install $FORCE -e ".[$EXTRAS]"
           echo "::endgroup::"
         elif [ -f requirements.txt ]; then
-          echo "::group::pip install -r requirements.txt"
-          python -m pip install -r requirements.txt
+          echo "::group::pip install $FORCE -r requirements.txt"
+          python -m pip install $FORCE -r requirements.txt
           echo "::endgroup::"
         else
           echo "::notice::No pyproject.toml or requirements.txt found — skip core install"
