@@ -42,6 +42,14 @@ on:
         required: false
         type: string
         default: ""
+      sql_check:
+        description: >
+          Valida anche clean.sql/mart SQL: sintassi (parse-only, BLOCCANTE,
+          non richiede RAW) e binding contro lo schema del preview (advisory,
+          non blocca). false = comportamento precedente (solo preflight rete).
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   validate-config:
@@ -58,15 +66,17 @@ jobs:
           ${{ inputs.install }}
           pip install pyyaml
 
-      - name: Validate all dataset configs (preflight)
+      - name: Validate dataset configs (preflight + SQL syntax)
         env:
           GLOBS: ${{ inputs.globs }}
           YEARS: ${{ inputs.years }}
           EXCLUDE: ${{ inputs.exclude }}
           CONFIGS: ${{ inputs.configs }}
+          SQL_CHECK: ${{ inputs.sql_check }}
           TOOLKIT_ALLOW_SCRIPT_SOURCE: "1"
         run: |
-          ERRORS=0
+          SYNTAX_ERRORS=0
+          WARNINGS=0
           # Se configs è fornito, usa solo quelli; altrimenti find su globs
           if [ -n "$CONFIGS" ]; then
             echo "→ Modalità: configs specifici"
@@ -110,14 +120,64 @@ jobs:
               Y="$YEARS"
             fi
             echo "→ $cfg (years: $Y)"
-            if toolkit run preflight --config "$cfg" --years "$Y" > /dev/null 2>&1; then
-              echo "  ✅ OK"
-            else
-              echo "  ⚠️  FAILED (fonte irraggiungibile o config invalida)"
-              ERRORS=$((ERRORS + 1))
+
+            SQL_FLAG=""
+            if [ "$SQL_CHECK" = "true" ]; then
+              SQL_FLAG="--sql-check"
             fi
+            REPORT=$(mktemp)
+            # exit non-zero è atteso: il verdetto si legge dal JSON, perché
+            # "failed" include sia errori bloccanti sia rete/preview.
+            toolkit run preflight --config "$cfg" --years "$Y" $SQL_FLAG --json \
+              > "$REPORT" 2>/dev/null || true
+
+            if ! jq -e . "$REPORT" >/dev/null 2>&1; then
+              echo "  ⚠️  nessun report JSON (toolkit non aggiornato o errore di avvio) — non blocking"
+              WARNINGS=$((WARNINGS + 1))
+              rm -f "$REPORT"
+              continue
+            fi
+
+            # ── Sintassi SQL: deterministica, bloccante ──────────────────
+            if [ "$SQL_CHECK" = "true" ]; then
+              if [ "$(jq -r '.sql_syntax.ok' "$REPORT")" = "false" ]; then
+                echo "  ❌ SQL syntax (blocking)"
+                jq -r '.sql_syntax.errors[]? | "     ✗ " + .' "$REPORT"
+                SYNTAX_ERRORS=$((SYNTAX_ERRORS + 1))
+                rm -f "$REPORT"
+                continue
+              fi
+              CHECKED=$(jq -r '.sql_syntax.checked | length' "$REPORT")
+              echo "  ✅ SQL syntax ($CHECKED file)"
+              SKIPPED=$(jq -r '.sql_syntax.skipped[]?' "$REPORT")
+              if [ -n "$SKIPPED" ]; then
+                echo "$SKIPPED" | sed 's/^/     ⏭ non verificabile: /'
+              fi
+            fi
+
+            # ── Rete/config/preview: non deterministico, advisory ────────
+            if [ "$(jq -r '.status' "$REPORT")" != "passed" ]; then
+              echo "  ⚠️  preflight non deterministico fallito (fonte/config) — non blocking"
+              jq -r '.config_check.errors[]? | "     ✗ config: " + .' "$REPORT"
+              UNREACHABLE=$(jq -r '[.sources[] | select(.reachable == false)] | length' "$REPORT")
+              if [ "$UNREACHABLE" -gt 0 ]; then
+                echo "     ⚠ fonti non raggiungibili: $UNREACHABLE"
+              fi
+              WARNINGS=$((WARNINGS + 1))
+            else
+              echo "  ✅ OK"
+            fi
+
+            # ── Binding contro lo schema del preview: advisory ───────────
+            jq -r '.sql_validation[]? | select(.ok == false) | "     ⚠ binding advisory (\(.year)): " + (.error | split("\n")[0])' "$REPORT" || true
+            rm -f "$REPORT"
           done < /tmp/configs.txt
-          if [ "$ERRORS" -gt 0 ]; then
-            echo "⚠️  $ERRORS config hanno fallito il preflight (non blocking)"
+
+          if [ "$SYNTAX_ERRORS" -gt 0 ]; then
+            echo "❌ $SYNTAX_ERRORS config con errori di sintassi SQL (blocking)"
+            exit 1
           fi
-          echo "✅ Preflight completato"
+          if [ "$WARNINGS" -gt 0 ]; then
+            echo "⚠️  $WARNINGS config con warning non bloccanti (fonti/config/preview)"
+          fi
+          echo "✅ Config check completato"
